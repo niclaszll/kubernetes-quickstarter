@@ -20,9 +20,30 @@ echo This VM has IP address $IPADDR
 # Writing the IP address to a file in the shared folder 
 echo $IPADDR > /vagrant/ip-address.txt
 
+cat > kubeadm-config.yaml <<EOF
+apiVersion: kubeadm.k8s.io/v1beta2
+kind: InitConfiguration
+localAPIEndpoint:
+  advertiseAddress: $IPADDR
+  bindPort: 6443
+---
+apiVersion: kubeadm.k8s.io/v1beta2
+kind: ClusterConfiguration
+clusterName: local-dev
+apiServer:
+  CertSANs:
+  - "$IPADDR"
+controllerManager:
+  extraArgs:
+    "address": "0.0.0.0"
+scheduler:
+  extraArgs:
+    "address": "0.0.0.0"
+EOF
+
 # Set up Kubernetes
 NODENAME=$(hostname -s)
-kubeadm init --apiserver-cert-extra-sans=$IPADDR  --node-name $NODENAME
+kubeadm init --config=kubeadm-config.yaml
 
 # Set up admin creds for the vagrant user
 echo Copying credentials to /home/vagrant...
@@ -41,3 +62,10 @@ sudo -u vagrant kubectl taint nodes --all node-role.kubernetes.io/master-
 # Install Helm
 echo Installing Helm...
 curl -s https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash
+
+# Install Prometheus
+echo Installing kube-prometheus-stack...
+sudo -u vagrant helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+sudo -u vagrant helm repo update
+sudo -u vagrant kubectl create ns monitoring
+sudo -u vagrant helm install prometheus prometheus-community/kube-prometheus-stack -n monitoring
