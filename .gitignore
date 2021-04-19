@@ -3,3 +3,4 @@
 ip-address.txt
 src/*
 !src/.gitkeep
+!src/ingress.example.yaml

@@ -34,7 +34,7 @@ Stop VM:
 vagrant halt
 ```
 
-## Expose Pods (for now)
+## Expose Prometheus and Grafana temporarily
 
 Prometheus:
 ```sh
@@ -54,6 +54,19 @@ If this combination does not work, you can alternatively get the password with t
 ```sh
 kubectl get secret --namespace monitoring prometheus-grafana -o jsonpath="{.data.admin-password}" | base64 --decode ; echo
 ```
+
+## Use Ingress to access Pods
+
+Add the following rules to your hosts file to access grafana and prometheus by the respective URLs (and their NodePorts):
+
+```
+192.168.99.100 grafana.kube-local.com
+192.168.99.100 prometheus.kube-local.com
+```
+
+Afterwards create the Ingress resource, e.g from the `ingress.example.yaml`.
+
+**TODO:** setup HAProxy as LB and automate ingress creation
 
 ## Acknowledgement
 

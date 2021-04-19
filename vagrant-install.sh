@@ -5,7 +5,7 @@ cat <<EOF >/etc/apt/sources.list.d/kubernetes.list
 deb http://apt.kubernetes.io/ kubernetes-xenial main
 EOF
 apt-get update
-apt-get install -y kubelet kubeadm kubectl
+apt-get install -y kubelet kubeadm kubectl haproxy
 
 # kubelet requires swap off
 swapoff -a
@@ -16,9 +16,6 @@ sudo sed -i '/ swap / s/^\(.*\)$/#\1/g' /etc/fstab
 # Get the IP address that VirtualBox has given this VM
 IPADDR=`ip -4 address show dev eth1 | grep inet | awk '{print $2}' | cut -f1 -d/`
 echo This VM has IP address $IPADDR
-
-# Writing the IP address to a file in the shared folder 
-echo $IPADDR > /vagrant/ip-address.txt
 
 cat > kubeadm-config.yaml <<EOF
 apiVersion: kubeadm.k8s.io/v1beta2
@@ -59,6 +56,14 @@ sudo -u vagrant kubectl apply -f https://cloud.weave.works/k8s/net?k8s-version=$
 echo Tainting nodes...
 sudo -u vagrant kubectl taint nodes --all node-role.kubernetes.io/master-
 
+# Setup nginx ingress controller
+sudo -u vagrant kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v0.45.0/deploy/static/provider/baremetal/deploy.yaml
+
+NODEPORT_HTTP=$(sudo -u vagrant kubectl get services -n ingress-nginx ingress-nginx-controller -o jsonpath='{.spec.ports[?(@.name=="http")].nodePort}')
+NODEPORT_HTTPS=$(sudo -u vagrant kubectl get services -n ingress-nginx ingress-nginx-controller -o jsonpath='{.spec.ports[?(@.name=="https")].nodePort}')
+echo NODEPORT_HTTP is $NODEPORT_HTTP
+echo NODEPORT_HTTPS is $NODEPORT_HTTPS
+
 # Install Helm
 echo Installing Helm...
 curl -s https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash
@@ -69,3 +74,26 @@ sudo -u vagrant helm repo add prometheus-community https://prometheus-community.
 sudo -u vagrant helm repo update
 sudo -u vagrant kubectl create ns monitoring
 sudo -u vagrant helm install prometheus prometheus-community/kube-prometheus-stack -n monitoring
+
+# TODO: setup haproxy as lb and route to services correctly, currently its running via NodePort
+
+# update HAProxy config
+sudo cat <<EOT >> /etc/haproxy/haproxy.cfg
+frontend http_front
+    mode tcp
+    bind *:80
+    default_backend http_back
+frontend https_front
+    mode tcp
+    bind *:443
+    default_backend https_back
+backend http_back
+    mode tcp
+    server worker1 192.168.99.100:$NODEPORT_HTTP
+backend https_back
+    mode tcp
+    server worker1 192.168.99.100:$NODEPORT_HTTPS
+EOT
+
+sudo systemctl enable haproxy
+sudo systemctl start haproxy
