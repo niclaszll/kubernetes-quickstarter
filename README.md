@@ -1,6 +1,6 @@
 # Vagrant Kubernetes Setup
 
-Single node Kubernetes cluster setup with [kube-prometheus-stack](https://github.com/prometheus-operator/kube-prometheus) for local development based on Vagrant. 
+Single node Kubernetes cluster setup with [kube-prometheus-stack](https://github.com/prometheus-operator/kube-prometheus) for local development based on Vagrant.
 
 ## Setup Virtualbox and Vagrant on macOS
 
@@ -34,39 +34,26 @@ Stop VM:
 vagrant halt
 ```
 
-## Expose Prometheus and Grafana temporarily
+## Use Ingress to access Pods
 
-Prometheus:
-```sh
-kubectl port-forward -n monitoring --address <YOUR_IP> <PROMETHEUS_POD_NAME> 9090
+Add the following rule to your hosts file:
+
+```
+192.168.99.110 grafana.kube-local.com prometheus.kube-local.com
 ```
 
-Grafana:
-```sh
-kubectl port-forward -n monitoring --address <YOUR_IP> <GRAFANA_POD_NAME> 3000
-```
+Afterwards you can access Grafana and Prometheus by the respective URLs: [grafana.kube-local.com](grafana.kube-local.com) or [prometheus.kube-local.com](prometheus.kube-local.com)
 
 Default Grafana credentials:
+
 - Username: `admin`
 - Password: `prom-operator`
 
 If this combination does not work, you can alternatively get the password with the following command:
+
 ```sh
 kubectl get secret --namespace monitoring prometheus-grafana -o jsonpath="{.data.admin-password}" | base64 --decode ; echo
 ```
-
-## Use Ingress to access Pods
-
-Add the following rules to your hosts file to access grafana and prometheus by the respective URLs (and their NodePorts):
-
-```
-192.168.99.100 grafana.kube-local.com
-192.168.99.100 prometheus.kube-local.com
-```
-
-Afterwards create the Ingress resource, e.g from the `ingress.example.yaml`.
-
-**TODO:** setup HAProxy as LB and automate ingress creation
 
 ## Acknowledgement
 

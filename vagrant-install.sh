@@ -5,7 +5,7 @@ cat <<EOF >/etc/apt/sources.list.d/kubernetes.list
 deb http://apt.kubernetes.io/ kubernetes-xenial main
 EOF
 apt-get update
-apt-get install -y kubelet kubeadm kubectl haproxy
+apt-get install -y kubelet kubeadm kubectl
 
 # kubelet requires swap off
 swapoff -a
@@ -56,14 +56,6 @@ sudo -u vagrant kubectl apply -f https://cloud.weave.works/k8s/net?k8s-version=$
 echo Tainting nodes...
 sudo -u vagrant kubectl taint nodes --all node-role.kubernetes.io/master-
 
-# Setup nginx ingress controller
-sudo -u vagrant kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v0.45.0/deploy/static/provider/baremetal/deploy.yaml
-
-NODEPORT_HTTP=$(sudo -u vagrant kubectl get services -n ingress-nginx ingress-nginx-controller -o jsonpath='{.spec.ports[?(@.name=="http")].nodePort}')
-NODEPORT_HTTPS=$(sudo -u vagrant kubectl get services -n ingress-nginx ingress-nginx-controller -o jsonpath='{.spec.ports[?(@.name=="https")].nodePort}')
-echo NODEPORT_HTTP is $NODEPORT_HTTP
-echo NODEPORT_HTTPS is $NODEPORT_HTTPS
-
 # Install Helm
 echo Installing Helm...
 curl -s https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash
@@ -75,25 +67,75 @@ sudo -u vagrant helm repo update
 sudo -u vagrant kubectl create ns monitoring
 sudo -u vagrant helm install prometheus prometheus-community/kube-prometheus-stack -n monitoring
 
-# TODO: setup haproxy as lb and route to services correctly, currently its running via NodePort
+# Install MetalLB
+echo Installing MetalLB...
+sudo -u vagrant kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.9.6/manifests/namespace.yaml
+sudo -u vagrant kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.9.6/manifests/metallb.yaml
+sudo -u vagrant kubectl create secret generic -n metallb-system memberlist --from-literal=secretkey="$(openssl rand -base64 128)"
 
-# update HAProxy config
-sudo cat <<EOT >> /etc/haproxy/haproxy.cfg
-frontend http_front
-    mode tcp
-    bind *:80
-    default_backend http_back
-frontend https_front
-    mode tcp
-    bind *:443
-    default_backend https_back
-backend http_back
-    mode tcp
-    server worker1 192.168.99.100:$NODEPORT_HTTP
-backend https_back
-    mode tcp
-    server worker1 192.168.99.100:$NODEPORT_HTTPS
-EOT
+cat << EOF > /tmp/metallb-config.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  namespace: metallb-system
+  name: config
+data:
+  config: |
+    address-pools:
+    - name: default
+      protocol: layer2
+      addresses:
+      - 192.168.99.110-192.168.99.150
+EOF
 
-sudo systemctl enable haproxy
-sudo systemctl start haproxy
+sudo -u vagrant kubectl create -f /tmp/metallb-config.yaml
+
+# Install ingress-nginx
+echo Installing ingress-nginx...
+sudo -u vagrant helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
+sudo -u vagrant helm repo update
+
+sudo -u vagrant kubectl create ns ingress-nginx
+
+# important: set custom values!
+sudo -u vagrant helm install my-ingress-nginx ingress-nginx/ingress-nginx --set hostNetwork=true --set hostPort.enabled=true --set kind=DaemonSet -n ingress-nginx
+
+# fix for "failed calling webhook" error
+# see: https://stackoverflow.com/a/63021823
+sudo -u vagrant kubectl delete -A ValidatingWebhookConfiguration my-ingress-nginx-admission -n ingress-nginx
+
+# Deploy Ingress
+echo Deploying Ingress...
+cat << EOF > /tmp/ingress.yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: minimal-ingress
+  namespace: monitoring
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  rules:
+    - host: grafana.kube-local.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: prometheus-grafana
+                port:
+                  number: 3000
+    - host: prometheus.kube-local.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: prometheus-kube-prometheus-prometheus
+                port:
+                  number: 9090
+EOF
+
+sudo -u vagrant kubectl create -f /tmp/ingress.yaml
