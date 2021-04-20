@@ -42,7 +42,7 @@ Add the following rule to your hosts file:
 192.168.99.110 grafana.kube-local.com prometheus.kube-local.com
 ```
 
-Afterwards you can access Grafana and Prometheus by the respective URLs: [grafana.kube-local.com](grafana.kube-local.com) or [prometheus.kube-local.com](prometheus.kube-local.com)
+Afterwards you can access Grafana and Prometheus by the respective URLs: [grafana.kube-local.com](http://grafana.kube-local.com) or [prometheus.kube-local.com](http://prometheus.kube-local.com)
 
 Default Grafana credentials:
 
