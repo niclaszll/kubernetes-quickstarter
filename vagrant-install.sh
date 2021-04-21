@@ -138,6 +138,16 @@ spec:
                 name: prometheus-kube-prometheus-prometheus
                 port:
                   number: 9090
+    - host: alertmanager.kube-local.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: prometheus-kube-prometheus-alertmanager
+                port:
+                  number: 9093
 EOF
 
 sudo -u vagrant kubectl create -f /tmp/ingress.yaml
