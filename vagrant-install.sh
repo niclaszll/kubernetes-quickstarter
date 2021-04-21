@@ -32,10 +32,12 @@ apiServer:
   - "$IPADDR"
 controllerManager:
   extraArgs:
-    "address": "0.0.0.0"
+    "bind-address": "0.0.0.0"
+    "port": "10252"
 scheduler:
   extraArgs:
-    "address": "0.0.0.0"
+    "bind-address": "0.0.0.0"
+    "port": "10251"
 EOF
 
 # Set up Kubernetes
