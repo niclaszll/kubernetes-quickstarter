@@ -55,6 +55,12 @@ If this combination does not work, you can alternatively get the password with t
 kubectl get secret --namespace monitoring prometheus-grafana -o jsonpath="{.data.admin-password}" | base64 --decode ; echo
 ```
 
+## Making changes to the kube-prometheus-stack helm chart values at runtime
+
+```
+helm upgrade -f /path/to/values.yaml prometheus prometheus-community/kube-prometheus-stack -n monitoring
+```
+
 ## Acknowledgement
 
 Basic setup from [Liz Rice](https://medium.com/@lizrice/kubernetes-in-vagrant-with-kubeadm-21979ded6c63).
