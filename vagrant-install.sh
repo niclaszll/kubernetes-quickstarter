@@ -1,3 +1,5 @@
+#! /bin/sh
+
 # Install kubernetes
 apt-get update && apt-get install -y apt-transport-https
 curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
@@ -41,22 +43,22 @@ scheduler:
 EOF
 
 # Set up Kubernetes
-NODENAME=$(hostname -s)
 kubeadm init --config=kubeadm-config.yaml
+export KUBECONFIG=/etc/kubernetes/admin.conf
 
 # Set up admin creds for the vagrant user
-echo Copying credentials to /home/vagrant...
-sudo --user=vagrant mkdir -p /home/vagrant/.kube
-cp -i /etc/kubernetes/admin.conf /home/vagrant/.kube/config
-chown $(id -u vagrant):$(id -g vagrant) /home/vagrant/.kube/config
+echo "Configure access to cluster for $(logname)"
+mkdir -p /home/$(logname)/.kube
+sudo cp /etc/kubernetes/admin.conf /home/$(logname)/.kube/config
+sudo chown $(logname):$(logname) /home/$(logname)/.kube/config
 
 # Install a pod network (e.g. Weave)
 echo Installing Weave...
-sudo -u vagrant kubectl apply -f https://cloud.weave.works/k8s/net?k8s-version=$(kubectl version | base64 | tr -d '\n')
+kubectl apply -f https://cloud.weave.works/k8s/net?k8s-version=$(kubectl version | base64 | tr -d '\n')
 
 # Allow pods to run on master node
 echo Tainting nodes...
-sudo -u vagrant kubectl taint nodes --all node-role.kubernetes.io/master-
+kubectl taint nodes --all node-role.kubernetes.io/master-
 
 # Install Helm
 echo Installing Helm...
@@ -64,16 +66,16 @@ curl -s https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | 
 
 # Install Prometheus
 echo Installing kube-prometheus-stack...
-sudo -u vagrant helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
-sudo -u vagrant helm repo update
-sudo -u vagrant kubectl create ns monitoring
-sudo -u vagrant helm install prometheus prometheus-community/kube-prometheus-stack -n monitoring
+helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+helm repo update
+kubectl create ns monitoring
+helm install prometheus prometheus-community/kube-prometheus-stack -n monitoring
 
 # Install MetalLB
 echo Installing MetalLB...
-sudo -u vagrant kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.9.6/manifests/namespace.yaml
-sudo -u vagrant kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.9.6/manifests/metallb.yaml
-sudo -u vagrant kubectl create secret generic -n metallb-system memberlist --from-literal=secretkey="$(openssl rand -base64 128)"
+kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.9.6/manifests/namespace.yaml
+kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.9.6/manifests/metallb.yaml
+kubectl create secret generic -n metallb-system memberlist --from-literal=secretkey="$(openssl rand -base64 128)"
 
 cat << EOF > /tmp/metallb-config.yaml
 apiVersion: v1
@@ -90,21 +92,21 @@ data:
       - 192.168.99.110-192.168.99.150
 EOF
 
-sudo -u vagrant kubectl create -f /tmp/metallb-config.yaml
+kubectl create -f /tmp/metallb-config.yaml
 
 # Install ingress-nginx
 echo Installing ingress-nginx...
-sudo -u vagrant helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
-sudo -u vagrant helm repo update
+helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
+helm repo update
 
-sudo -u vagrant kubectl create ns ingress-nginx
+kubectl create ns ingress-nginx
 
 # important: set custom values!
-sudo -u vagrant helm install my-ingress-nginx ingress-nginx/ingress-nginx --set hostNetwork=true --set hostPort.enabled=true --set kind=DaemonSet -n ingress-nginx
+helm install my-ingress-nginx ingress-nginx/ingress-nginx --set hostNetwork=true --set hostPort.enabled=true --set kind=DaemonSet -n ingress-nginx
 
 # fix for "failed calling webhook" error
 # see: https://stackoverflow.com/a/63021823
-sudo -u vagrant kubectl delete -A ValidatingWebhookConfiguration my-ingress-nginx-admission -n ingress-nginx
+kubectl delete -A ValidatingWebhookConfiguration my-ingress-nginx-admission -n ingress-nginx
 
 # Deploy Ingress
 echo Deploying Ingress...
@@ -150,4 +152,4 @@ spec:
                   number: 9093
 EOF
 
-sudo -u vagrant kubectl create -f /tmp/ingress.yaml
+kubectl create -f /tmp/ingress.yaml
