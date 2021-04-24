@@ -1,5 +1,4 @@
 .DS_Store
 .vagrant/
-ip-address.txt
 src/*
-!src/.gitkeep
+!src/setup

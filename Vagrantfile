@@ -14,6 +14,6 @@ Vagrant.configure("2") do |config|
   config.vm.provision "docker"
   # Specify the shared folder mounted from the host if you like
   # By default you get "." synced as "/vagrant"
-  config.vm.synced_folder "./src", "/home/src"  
+  config.vm.synced_folder "./src", "/home/vagrant/src"  
   config.vm.provision "shell", path: "vagrant-install.sh"
 end

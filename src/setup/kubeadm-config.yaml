@@ -1,0 +1,20 @@
+apiVersion: kubeadm.k8s.io/v1beta2
+kind: InitConfiguration
+localAPIEndpoint:
+  advertiseAddress: vIPADDR
+  bindPort: 6443
+---
+apiVersion: kubeadm.k8s.io/v1beta2
+kind: ClusterConfiguration
+clusterName: local-dev
+apiServer:
+  CertSANs:
+    - "vIPADDR"
+controllerManager:
+  extraArgs:
+    "bind-address": "0.0.0.0"
+    "port": "10252"
+scheduler:
+  extraArgs:
+    "bind-address": "0.0.0.0"
+    "port": "10251"
