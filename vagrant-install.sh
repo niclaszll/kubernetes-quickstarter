@@ -1,4 +1,4 @@
-#! /bin/sh
+#! /bin/bash
 
 # Install kubernetes
 apt-get update && apt-get install -y apt-transport-https
@@ -7,7 +7,12 @@ cat <<EOF >/etc/apt/sources.list.d/kubernetes.list
 deb http://apt.kubernetes.io/ kubernetes-xenial main
 EOF
 apt-get update
-apt-get install -y kubelet kubeadm kubectl
+apt-get install -y kubelet kubeadm kubectl bash-completion
+
+# enable kubectl auto-completion
+source /usr/share/bash-completion/bash_completion
+echo 'source <(kubectl completion bash)' >> /home/vagrant/.bashrc
+source /home/vagrant/.bashrc
 
 # kubelet requires swap off
 swapoff -a
