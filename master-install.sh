@@ -1,4 +1,6 @@
 #! /bin/bash
+JOIN_FILE=/vagrant/join.sh
+chmod +x $JOIN_FILE
 
 # Install kubernetes
 echo "[kube-install] Installing Kubernetes"
@@ -31,8 +33,8 @@ echo "[kube-install] Initialising cluster with kubeadm"
 cp /home/vagrant/src/setup/kubeadm-config.yaml /tmp/kubeadm-config.yaml
 sed -i "s/vIPADDR/$IPADDR/g" /tmp/kubeadm-config.yaml
 
-# Init cluster
-kubeadm init --config=/tmp/kubeadm-config.yaml
+# Init cluster and create join script for other nodes
+kubeadm init --config=/tmp/kubeadm-config.yaml | grep -Ei "kubeadm join|discovery-token-ca-cert-hash" > ${JOIN_FILE}
 export KUBECONFIG=/etc/kubernetes/admin.conf
 
 # Set up admin creds for the vagrant user

@@ -1,6 +1,6 @@
 # Vagrant Kubernetes Setup
 
-Single node Kubernetes cluster setup with [kube-prometheus-stack](https://github.com/prometheus-operator/kube-prometheus) for local development based on Vagrant.
+Multi node Kubernetes cluster setup with [kube-prometheus-stack](https://github.com/prometheus-operator/kube-prometheus) for local development based on Vagrant.
 
 ## Setup Virtualbox and Vagrant on macOS
 
@@ -25,13 +25,8 @@ vagrant up
 Connect to VM:
 
 ```sh
-vagrant ssh
-```
-
-Stop VM:
-
-```sh
-vagrant halt
+vagrant ssh master
+vagrant ssh worker
 ```
 
 ## Use Ingress to access Pods
