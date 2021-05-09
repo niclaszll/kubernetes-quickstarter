@@ -86,4 +86,9 @@ kubectl delete -A ValidatingWebhookConfiguration my-ingress-nginx-admission -n i
 echo "[post-install] Deploying Ingress"
 kubectl create -f /home/vagrant/src/setup/ingress.yaml
 
+# Install VerneMQ
+kubectl create ns mqtt
+helm repo add vernemq https://vernemq.github.io/docker-vernemq
+helm install vernemq/vernemq -n mqtt --generate-name --set additionalEnv[0].name=DOCKER_VERNEMQ_ACCEPT_EULA,additionalEnv[0].value="yes"
+
 
