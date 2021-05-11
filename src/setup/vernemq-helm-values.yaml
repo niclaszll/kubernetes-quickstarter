@@ -1,0 +1,9 @@
+additionalEnv:
+  - name: DOCKER_VERNEMQ_ACCEPT_EULA
+    value: "yes"
+  - name: DOCKER_VERNEMQ_ALLOW_ANONYMOUS
+    value: "on"
+serviceMonitor:
+  create: true
+service:
+  type: LoadBalancer
