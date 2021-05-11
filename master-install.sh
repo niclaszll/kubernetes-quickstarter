@@ -60,7 +60,7 @@ echo "[post-install] Installing kube-prometheus-stack"
 helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
 helm repo update
 kubectl create ns monitoring
-helm install prometheus prometheus-community/kube-prometheus-stack -n monitoring
+helm install prometheus prometheus-community/kube-prometheus-stack -n monitoring --set prometheus.prometheusSpec.podMonitorSelectorNilUsesHelmValues=false,prometheus.prometheusSpec.serviceMonitorSelectorNilUsesHelmValues=false
 
 # Install MetalLB
 echo "[post-install] Installing MetalLB"
@@ -89,6 +89,6 @@ kubectl create -f /home/vagrant/src/setup/ingress.yaml
 # Install VerneMQ
 kubectl create ns mqtt
 helm repo add vernemq https://vernemq.github.io/docker-vernemq
-helm install vernemq vernemq/vernemq -n mqtt --set additionalEnv[0].name=DOCKER_VERNEMQ_ACCEPT_EULA,additionalEnv[0].value="yes",additionalEnv[1].name=DOCKER_VERNEMQ_ALLOW_ANONYMOUS,additionalEnv[1].value="on"
+helm install vernemq vernemq/vernemq -n mqtt --set additionalEnv[0].name=DOCKER_VERNEMQ_ACCEPT_EULA,additionalEnv[0].value="yes",additionalEnv[1].name=DOCKER_VERNEMQ_ALLOW_ANONYMOUS,additionalEnv[1].value="on",serviceMonitor.create=true
 
 
