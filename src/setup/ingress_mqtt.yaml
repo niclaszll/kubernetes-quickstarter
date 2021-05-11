@@ -4,7 +4,7 @@ metadata:
   name: minimal-mqtt-ingress
   namespace: mqtt
   annotations:
-    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
 spec:
   rules:
     - host: vernemq.kube-local.com
@@ -16,4 +16,5 @@ spec:
               service:
                 name: vernemq
                 port:
-                  number: 1883
+                  number: 9001
+# TODO service.ws.enabled=true in vernemq helm setup, to use ws instead of mqtt for ingress?
