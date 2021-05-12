@@ -89,6 +89,5 @@ kubectl create -f /home/vagrant/src/setup/ingress.yaml
 # Install VerneMQ
 kubectl create ns mqtt
 helm repo add vernemq https://vernemq.github.io/docker-vernemq
-#helm install vernemq vernemq/vernemq -n mqtt --set additionalEnv[0].name=DOCKER_VERNEMQ_ACCEPT_EULA,additionalEnv[0].value="yes",additionalEnv[1].name=DOCKER_VERNEMQ_ALLOW_ANONYMOUS,additionalEnv[1].value="on",serviceMonitor.create=true
 helm install -f /home/vagrant/src/setup/vernemq-helm-values.yaml vernemq vernemq/vernemq -n mqtt
 
