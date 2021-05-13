@@ -20,3 +20,7 @@ scheduler:
   extraArgs:
     "bind-address": "0.0.0.0"
     "port": "10251"
+---
+apiVersion: kubeproxy.config.k8s.io/v1alpha1
+kind: KubeProxyConfiguration
+metricsBindAddress: "0.0.0.0:10249"
