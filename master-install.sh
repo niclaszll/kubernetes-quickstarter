@@ -10,7 +10,7 @@ cat <<EOF >/etc/apt/sources.list.d/kubernetes.list
 deb http://apt.kubernetes.io/ kubernetes-xenial main
 EOF
 apt-get update
-apt-get install -y kubelet kubeadm kubectl bash-completion mosquitto-clients
+apt-get install -y kubelet kubeadm kubectl bash-completion mosquitto-clients nfs-kernel-server
 
 # enable kubectl auto-completion
 source /usr/share/bash-completion/bash_completion
@@ -90,4 +90,11 @@ kubectl create -f /home/vagrant/src/setup/ingress.yaml
 kubectl create ns mqtt
 helm repo add vernemq https://vernemq.github.io/docker-vernemq
 helm install -f /home/vagrant/src/setup/vernemq-helm-values.yaml vernemq vernemq/vernemq -n mqtt
+
+echo "[post-install] Setting up NFS"
+# https://www.digitalocean.com/community/tutorials/how-to-set-up-an-nfs-mount-on-ubuntu-20-04
+sudo mkdir /var/nfs/general -p
+sudo chown nobody:nogroup /var/nfs/general
+echo '/var/nfs/general    *(rw,sync,no_subtree_check,no_root_squash,no_all_squash,insecure)' | sudo tee -a /etc/exports
+sudo systemctl restart nfs-kernel-server
 
