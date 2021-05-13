@@ -41,7 +41,7 @@ export KUBECONFIG=/etc/kubernetes/admin.conf
 echo "[post-install] Configuring access to cluster for user $(logname)"
 mkdir -p /home/$(logname)/.kube
 sudo cp /etc/kubernetes/admin.conf /home/$(logname)/.kube/config
-sudo chown $(logname):$(logname) /home/$(logname)/.kube/config
+sudo chown $(logname):$(logname) -R /home/$(logname)/.kube
 
 # Install a pod network (e.g. Weave)
 echo "[post-install] Installing Weave"
