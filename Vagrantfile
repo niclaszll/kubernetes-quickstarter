@@ -27,5 +27,7 @@ Vagrant.configure("2") do |config|
     worker.vm.provision "shell", inline: "sed 's/127\.0\.2\.1/192\.168\.99\.101/g' -i /etc/hosts"
     worker.vm.provision "docker"
     worker.vm.provision "shell", path: "worker-install.sh"
+    # ssh back into master and execute post install script
+    worker.vm.provision "shell", inline: "sshpass -pvagrant ssh -oStrictHostKeyChecking=no vagrant@192.168.99.100 'sh /home/vagrant/src/setup/master-post-install.sh' && exit"
   end
 end

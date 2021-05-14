@@ -10,7 +10,7 @@ cat <<EOF >/etc/apt/sources.list.d/kubernetes.list
 deb http://apt.kubernetes.io/ kubernetes-xenial main
 EOF
 apt-get update
-apt-get install -y kubelet kubeadm kubectl bash-completion
+apt-get install -y kubelet kubeadm kubectl bash-completion mosquitto-clients nfs-kernel-server
 
 # enable kubectl auto-completion
 source /usr/share/bash-completion/bash_completion
@@ -41,7 +41,7 @@ export KUBECONFIG=/etc/kubernetes/admin.conf
 echo "[post-install] Configuring access to cluster for user $(logname)"
 mkdir -p /home/$(logname)/.kube
 sudo cp /etc/kubernetes/admin.conf /home/$(logname)/.kube/config
-sudo chown $(logname):$(logname) /home/$(logname)/.kube/config
+sudo chown $(logname):$(logname) -R /home/$(logname)/.kube
 
 # Install a pod network (e.g. Weave)
 echo "[post-install] Installing Weave"
@@ -60,7 +60,7 @@ echo "[post-install] Installing kube-prometheus-stack"
 helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
 helm repo update
 kubectl create ns monitoring
-helm install prometheus prometheus-community/kube-prometheus-stack -n monitoring
+helm install prometheus prometheus-community/kube-prometheus-stack -n monitoring --set prometheus.prometheusSpec.podMonitorSelectorNilUsesHelmValues=false,prometheus.prometheusSpec.serviceMonitorSelectorNilUsesHelmValues=false
 
 # Install MetalLB
 echo "[post-install] Installing MetalLB"
@@ -86,4 +86,15 @@ kubectl delete -A ValidatingWebhookConfiguration my-ingress-nginx-admission -n i
 echo "[post-install] Deploying Ingress"
 kubectl create -f /home/vagrant/src/setup/ingress.yaml
 
+# Install VerneMQ
+kubectl create ns mqtt
+helm repo add vernemq https://vernemq.github.io/docker-vernemq
+helm install -f /home/vagrant/src/setup/vernemq-helm-values.yaml vernemq vernemq/vernemq -n mqtt
+
+echo "[post-install] Setting up NFS"
+# https://www.digitalocean.com/community/tutorials/how-to-set-up-an-nfs-mount-on-ubuntu-20-04
+sudo mkdir /var/nfs/general -p
+sudo chown nobody:nogroup /var/nfs/general
+echo '/var/nfs/general    *(rw,sync,no_subtree_check,no_root_squash,no_all_squash,insecure)' | sudo tee -a /etc/exports
+sudo systemctl restart nfs-kernel-server
 
