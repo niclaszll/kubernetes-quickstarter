@@ -52,8 +52,15 @@ kubectl get secret --namespace monitoring prometheus-grafana -o jsonpath="{.data
 
 ## Making changes to the kube-prometheus-stack helm chart values at runtime
 
-```
+```sh
 helm upgrade -f /path/to/values.yaml prometheus prometheus-community/kube-prometheus-stack -n monitoring
+```
+
+## Load Testing the MQTT Broker
+
+For example:
+```sh
+docker run --rm inovex/mqtt-stresser -broker tcp://192.168.99.149:1883 -num-clients 100 -num-messages 500
 ```
 
 ## Acknowledgement
