@@ -5,6 +5,7 @@
 Deploy [Prometheus StatsD Exporter](https://github.com/hahow/prometheus-statsd-exporter):
 
 ```sh
+helm repo add hahow https://hahow-helm-charts.storage.googleapis.com/
 helm install prometheus-statsd-exporter hahow/prometheus-statsd-exporter -n monitoring --set service.type=NodePort
 ```
 
