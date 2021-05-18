@@ -2,5 +2,6 @@
 .vagrant/
 src/*
 !src/setup
+src/setup/join-command
 !src/load-testing
 join.sh

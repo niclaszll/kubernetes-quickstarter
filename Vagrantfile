@@ -2,6 +2,8 @@
 # vi: set ft=ruby :
 
 Vagrant.configure("2") do |config|
+  config.ssh.insert_key = false
+
   config.vm.provider "virtualbox" do |v|
     v.linked_clone = true
     v.memory = 2048
@@ -13,10 +15,14 @@ Vagrant.configure("2") do |config|
     master.vm.box = "bento/ubuntu-20.04"
     master.vm.hostname = "master"
     master.vm.network "private_network", ip: "192.168.99.100"
-    master.vm.provision "shell", inline: "sed 's/127\.0\.2\.1/192\.168\.99\.100/g' -i /etc/hosts"
-    master.vm.provision "docker"
+    #master.vm.provision "shell", inline: "sed 's/127\.0\.2\.1/192\.168\.99\.100/g' -i /etc/hosts"
     master.vm.synced_folder "./src", "/home/vagrant/src"  
-    master.vm.provision "shell", path: "master-install.sh"
+    master.vm.provision "ansible" do |ansible|
+      ansible.playbook = "src/setup/master-playbook.yaml"
+      ansible.extra_vars = {
+          node_ip: "192.168.99.100",
+      }
+    end
   end
   
   # worker node
@@ -24,10 +30,16 @@ Vagrant.configure("2") do |config|
     worker.vm.box = "bento/ubuntu-20.04"
     worker.vm.hostname = "worker"
     worker.vm.network "private_network", ip: "192.168.99.101"
-    worker.vm.provision "shell", inline: "sed 's/127\.0\.2\.1/192\.168\.99\.101/g' -i /etc/hosts"
-    worker.vm.provision "docker"
-    worker.vm.provision "shell", path: "worker-install.sh"
+    #worker.vm.provision "shell", inline: "sed 's/127\.0\.2\.1/192\.168\.99\.101/g' -i /etc/hosts"
+    #worker.vm.provision "docker"
+    #worker.vm.provision "shell", path: "worker-install.sh"
     # ssh back into master and execute post install script
-    worker.vm.provision "shell", inline: "sshpass -pvagrant ssh -oStrictHostKeyChecking=no vagrant@192.168.99.100 'sh /home/vagrant/src/setup/master-post-install.sh' && exit"
+    #worker.vm.provision "shell", inline: "sshpass -pvagrant ssh -oStrictHostKeyChecking=no vagrant@192.168.99.100 'sh /home/vagrant/src/setup/master-post-install.sh' && exit"
+    worker.vm.provision "ansible" do |ansible|
+      ansible.playbook = "src/setup/node-playbook.yaml"
+      ansible.extra_vars = {
+          node_ip: "192.168.99.101",
+      }
+    end
   end
 end
