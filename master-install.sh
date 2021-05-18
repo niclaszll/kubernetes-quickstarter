@@ -86,15 +86,14 @@ kubectl delete -A ValidatingWebhookConfiguration my-ingress-nginx-admission -n i
 echo "[post-install] Deploying Ingress"
 kubectl create -f /home/vagrant/src/setup/ingress.yaml
 
-# Install VerneMQ
-kubectl create ns mqtt
-helm repo add vernemq https://vernemq.github.io/docker-vernemq
-helm install -f /home/vagrant/src/setup/vernemq-helm-values.yaml vernemq vernemq/vernemq -n mqtt
-
 echo "[post-install] Setting up NFS"
 # https://www.digitalocean.com/community/tutorials/how-to-set-up-an-nfs-mount-on-ubuntu-20-04
 sudo mkdir /var/nfs/general -p
 sudo chown nobody:nogroup /var/nfs/general
 echo '/var/nfs/general    *(rw,sync,no_subtree_check,no_root_squash,no_all_squash,insecure)' | sudo tee -a /etc/exports
 sudo systemctl restart nfs-kernel-server
+
+#helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+#helm repo update
+#helm install prometheus-adapter -f /home/vagrant/src/setup/prometheus-adapter-values.yaml prometheus-community/prometheus-adapter -n monitoring
 
