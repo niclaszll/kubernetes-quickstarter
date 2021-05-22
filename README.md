@@ -55,6 +55,24 @@ kubectl get secret --namespace monitoring prometheus-grafana -o jsonpath="{.data
 helm upgrade -f /path/to/values.yaml prometheus prometheus-community/kube-prometheus-stack -n monitoring
 ```
 
-## Acknowledgement
+## Terraform
 
-Basic setup from [Liz Rice](https://medium.com/@lizrice/kubernetes-in-vagrant-with-kubeadm-21979ded6c63).
+Provision resources:
+```sh
+terraform apply -var "do_token=${DO_PAT}" -var "pvt_key=/Users/<USERNAME>/.ssh/id_rsa" -var "pub_key=/Users/<USERNAME>/.ssh/id_rsa.pub"
+```
+
+Connect to node:
+```sh
+ssh -i /Users/<USERNAME>/.ssh/id_rsa kubedev@<NODE_IP>
+```
+
+Destroy resources:
+```sh
+terraform destroy -var "do_token=${DO_PAT}" -var "pvt_key=/Users/<USERNAME>/.ssh/id_rsa" -var "pub_key=/Users/<USERNAME>/.ssh/id_rsa.pub"
+```
+
+TODO:
+- LB
+- Domain
+- master post install
