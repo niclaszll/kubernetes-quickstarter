@@ -224,15 +224,28 @@
       become_user: kubedev
       shell: kubectl apply -f /tmp/digitalocean-cloud-controller-manager/releases/v0.1.32.yml
 
-    - name: Deploy Ingress
+    - name: Deploy ingress-nginx
       become: true
       become_user: kubedev
       shell: "{{ item }}"
       with_items:
         - kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v0.46.0/deploy/static/provider/do/deploy.yaml
         - kubectl create ns monitoring
-        # TODO: wait for loadbalancer to be provisioned!
-        - kubectl create -f /home/kubedev/setup/kubernetes/ingress.yaml
+
+    - name: Wait for loadbalancer to be provisioned
+      become: true
+      become_user: kubedev
+      shell: kubectl -n ingress-nginx get svc ingress-nginx-controller -o jsonpath='{.status.loadBalancer.ingress[0].ip}'
+      register: lb_result
+      until: lb_result.stdout | length > 0
+      # max wait time 5m
+      retries: 20
+      delay: 15
+
+    - name: Deploy Ingress
+      become: true
+      become_user: kubedev
+      shell: "kubectl create -f /home/kubedev/setup/kubernetes/ingress.yaml"
 
     - name: Install helm
       shell: "{{ item }}"
