@@ -2,13 +2,13 @@
 - hosts: all
   become: true
   tasks:
-    # - name: Update hosts entry with correct IP
-    #   become: true
-    #   shell: sed 's/127\.0\.2\.1/192\.168\.99\.100/g' -i /etc/hosts
-
     - name: Get Public IP
       shell: dig +short myip.opendns.com @resolver1.opendns.com
       register: public_ip
+
+    - name: Get Droplet ID
+      command: curl -s http://169.254.169.254/metadata/v1/id
+      register: droplet_id
 
     - name: Add the user 'kubedev'
       ansible.builtin.user:
@@ -16,6 +16,7 @@
         home: /home/kubedev/
         shell: /bin/bash
         group: sudo
+        password: kubedev
 
     - name: Add SSH key to 'kubedev'
       authorized_key:
@@ -145,7 +146,13 @@
         src: ./setup/kubernetes/kubeadm-config.yaml
         dest: /tmp/kubeadm-config.yaml
 
-    # TODO: use ansbiles lineinfile
+    - name: Configure kubelet for digitalocean-cloud-controller-manager
+      replace:
+        path: /tmp/kubeadm-config.yaml
+        regexp: "vProviderID"
+        replace: "digitalocean://{{ droplet_id.stdout }}"
+
+    # TODO: use ansibles lineinfile
     - name: Replace localAPIEndpoint.advertiseAddress with correct IP
       shell: sed -i "s/vAdvertiseAddress/{{ public_ip.stdout }}/g" /tmp/kubeadm-config.yaml
 
@@ -181,7 +188,6 @@
     - name: Generate join command
       shell: kubeadm token create --print-join-command > /tmp/join-command
 
-    # TODO
     - name: Copy join command to local file
       fetch:
         src: /tmp/join-command
@@ -192,6 +198,41 @@
       become: true
       become_user: kubedev
       command: kubectl taint nodes --all node-role.kubernetes.io/master-
+
+    # see: https://github.com/digitalocean/digitalocean-cloud-controller-manager/issues/361
+    - name: Remove node label
+      become: true
+      become_user: kubedev
+      command: kubectl label node master-0 node-role.kubernetes.io/master-
+
+    - name: Clone digitalocean-cloud-controller-manager
+      become: true
+      become_user: kubedev
+      ansible.builtin.git:
+        repo: "https://github.com/digitalocean/digitalocean-cloud-controller-manager.git"
+        dest: /tmp/digitalocean-cloud-controller-manager/
+
+    - name: Create digitalocean-cloud-controller-manager secret
+      become: true
+      become_user: kubedev
+      shell: echo "y" | /tmp/digitalocean-cloud-controller-manager/scripts/generate-secret.sh
+      environment:
+        DIGITALOCEAN_ACCESS_TOKEN: "{{ do_token }}"
+
+    - name: Deploy digitalocean-cloud-controller-manager
+      become: true
+      become_user: kubedev
+      shell: kubectl apply -f /tmp/digitalocean-cloud-controller-manager/releases/v0.1.32.yml
+
+    - name: Deploy Ingress
+      become: true
+      become_user: kubedev
+      shell: "{{ item }}"
+      with_items:
+        - kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v0.46.0/deploy/static/provider/do/deploy.yaml
+        - kubectl create ns monitoring
+        # TODO: wait for loadbalancer to be provisioned!
+        - kubectl create -f /home/kubedev/setup/kubernetes/ingress.yaml
 
     - name: Install helm
       shell: "{{ item }}"
@@ -219,47 +260,6 @@
         values:
           prometheus.prometheusSpec.podMonitorSelectorNilUsesHelmValues: false
           prometheus.prometheusSpec.serviceMonitorSelectorNilUsesHelmValues: false
-
-    # - name: Deploy MetalLB
-    #   shell: "{{ item }}"
-    #   with_items:
-    #     - kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.9.6/manifests/namespace.yaml
-    #     - kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.9.6/manifests/metallb.yaml
-    #     - kubectl create secret generic -n metallb-system memberlist --from-literal=secretkey="$(openssl rand -base64 128)"
-    #     - kubectl create -f /home/kubedev/setup/kubernetes/metallb-config.yaml
-
-    - name: Add ingress-nginx helm repo
-      become: true
-      become_user: kubedev
-      community.kubernetes.helm_repository:
-        name: ingress-nginx
-        repo_url: "https://kubernetes.github.io/ingress-nginx"
-
-    - name: Deploy ingress-nginx
-      become: true
-      become_user: kubedev
-      community.kubernetes.helm:
-        name: my-ingress-nginx
-        chart_ref: ingress-nginx/ingress-nginx
-        update_repo_cache: yes
-        release_namespace: ingress-nginx
-        create_namespace: true
-        values:
-          hostNetwork: true
-          hostPort.enabled: true
-          kind: DaemonSet
-
-    # fix for "failed calling webhook" error
-    # see: https://stackoverflow.com/a/63021823
-    - name: Delete ValidatingWebhookConfiguration for ingress-nginx
-      become: true
-      become_user: kubedev
-      command: kubectl delete -A ValidatingWebhookConfiguration my-ingress-nginx-admission -n ingress-nginx
-
-    - name: Deploy Ingress
-      become: true
-      become_user: kubedev
-      command: kubectl create -f /home/kubedev/setup/kubernetes/ingress.yaml
 
     - name: Set up NFS
       shell: "{{ item }}"

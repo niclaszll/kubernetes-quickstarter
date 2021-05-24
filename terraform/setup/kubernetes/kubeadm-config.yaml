@@ -3,6 +3,10 @@ kind: InitConfiguration
 localAPIEndpoint:
   advertiseAddress: vAdvertiseAddress
   bindPort: 6443
+nodeRegistration:
+  kubeletExtraArgs:
+    cloud-provider: "external"
+    provider-id: "vProviderID"
 ---
 apiVersion: kubeadm.k8s.io/v1beta2
 kind: ClusterConfiguration
@@ -10,6 +14,11 @@ clusterName: local-dev
 networking:
   podSubnet: "10.100.0.1/24"
 apiServer:
+  extraArgs:
+    kubelet-preferred-address-types: "InternalIP,ExternalIP,Hostname"
+    # needed for LB provisioning
+    # see: https://github.com/digitalocean/digitalocean-cloud-controller-manager/issues/361
+    # feature-gates: "LegacyNodeRoleBehavior=false"
   CertSANs:
     - "vCertSANs"
 controllerManager:
