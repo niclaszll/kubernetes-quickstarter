@@ -2,21 +2,34 @@
 - hosts: all
   become: true
   tasks:
-    # - name: Update hosts entry with correct IP
-    #   become: true
-    #   shell: sed 's/127\.0\.2\.1/192\.168\.99\.101/g' -i /etc/hosts
-
     - name: Get Public IP
       shell: dig +short myip.opendns.com @resolver1.opendns.com
       register: public_ip
 
+    - name: Get Droplet ID
+      command: curl -s http://169.254.169.254/metadata/v1/id
+      register: droplet_id
+
+    - name: Create 'developers' group
+      group:
+        name: developers
+        state: present
+
+    - name: Allow 'developers' group to have passwordless sudo
+      lineinfile:
+        path: /etc/sudoers
+        state: present
+        regexp: "^%developers"
+        line: "%developers ALL=(ALL) NOPASSWD: ALL"
+        validate: "visudo -cf %s"
+
     - name: Add the user 'kubedev'
       ansible.builtin.user:
         name: kubedev
+        append: yes
         home: /home/kubedev/
         shell: /bin/bash
-        group: sudo
-        password: kubedev
+        groups: developers
 
     - name: Add SSH key to 'kubedev'
       authorized_key:
@@ -111,14 +124,10 @@
           - kubeadm
           - kubectl
 
-    - name: Get Droplet ID
-      command: curl -s http://169.254.169.254/metadata/v1/id
-      register: droplet_id
-
-    - name: Configure kubelet for digitalocean-cloud-controller-manager 
+    - name: Configure kubelet for digitalocean-cloud-controller-manager
       lineinfile:
-        path: /etc/default/kubelet.conf
-        line: KUBELET_EXTRA_ARGS=--cloud-provider=external --provider-id=digitalocean://{{ droplet_id }}
+        path: /etc/default/kubelet
+        line: KUBELET_EXTRA_ARGS=--cloud-provider=external --provider-id=digitalocean://{{ droplet_id.stdout }}
         create: yes
 
     - name: Restart kubelet

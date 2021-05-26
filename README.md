@@ -95,12 +95,14 @@ Destroy resources:
 terraform destroy -var "do_token=${DO_PAT}" -var "pvt_key=/Users/<USERNAME>/.ssh/id_rsa" -var "pub_key=/Users/<USERNAME>/.ssh/id_rsa.pub" -auto-approve
 ```
 
+Don't forget to manually delete the provisioned load balancer(s) as they are not managed and destroyed by Terraform!
+
 **TODO**
+- fix worker node (assigned, but status=down in LB)
 - Domain and https
-- worker node
 - master post install
 
-## Use Ingress to access Pods
+## Use Ingress to access Pods without a domain (for testing)
 
 Add the following rule to your hosts file:
 
