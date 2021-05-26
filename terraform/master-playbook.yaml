@@ -10,13 +10,26 @@
       command: curl -s http://169.254.169.254/metadata/v1/id
       register: droplet_id
 
+    - name: Create 'developers' group
+      group:
+        name: developers
+        state: present
+
+    - name: Allow 'developers' group to have passwordless sudo
+      lineinfile:
+        path: /etc/sudoers
+        state: present
+        regexp: '^%developers'
+        line: '%developers ALL=(ALL) NOPASSWD: ALL'
+        validate: 'visudo -cf %s'
+
     - name: Add the user 'kubedev'
       ansible.builtin.user:
         name: kubedev
+        append: yes
         home: /home/kubedev/
         shell: /bin/bash
-        group: sudo
-        password: kubedev
+        groups: developers
 
     - name: Add SSH key to 'kubedev'
       authorized_key:
@@ -178,12 +191,12 @@
       with_items:
         - mkdir -p /home/kubedev/.kube
         - cp -i /etc/kubernetes/admin.conf /home/kubedev/.kube/config
-        - chown kubedev:sudo -R /home/kubedev/.kube
+        - chown kubedev:developers -R /home/kubedev/.kube
 
-    - name: Install Weave pod network
+    - name: Install flannel pod network
       become: true
       become_user: kubedev
-      shell: kubectl apply -f https://cloud.weave.works/k8s/net?k8s-version=$(kubectl version | base64 | tr -d '\n')
+      shell: kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
 
     - name: Generate join command
       shell: kubeadm token create --print-join-command > /tmp/join-command
@@ -199,11 +212,15 @@
       become_user: kubedev
       command: kubectl taint nodes --all node-role.kubernetes.io/master-
 
-    # see: https://github.com/digitalocean/digitalocean-cloud-controller-manager/issues/361
-    - name: Remove node label
+    - name: Remove master node label
       become: true
       become_user: kubedev
-      command: kubectl label node master-0 node-role.kubernetes.io/master-
+      command: "{{ item }}"
+      with_items:
+        # see: https://github.com/digitalocean/digitalocean-cloud-controller-manager/issues/361
+        - kubectl label node master-0 node-role.kubernetes.io/master-
+        # needs to be removed, else nodes won't get assigned to lb
+        - kubectl label node master-0 node.kubernetes.io/exclude-from-external-load-balancers-
 
     - name: Clone digitalocean-cloud-controller-manager
       become: true

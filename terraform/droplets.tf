@@ -4,6 +4,7 @@ resource "digitalocean_droplet" "master" {
   name   = "master-${count.index}"
   region = "fra1"
   size   = "s-2vcpu-2gb"
+  private_networking  = true
 
   ssh_keys = [
       data.digitalocean_ssh_key.terraform.id
@@ -55,10 +56,10 @@ resource "digitalocean_droplet" "master" {
 #   }
 # }
 
-output "master_droplet_ip_addresses" {
+output "master_droplet_ssh_connection" {
   value = {
     for droplet in digitalocean_droplet.master:
-    droplet.name => droplet.ipv4_address
+    droplet.name => "ssh -i ${var.pvt_key} kubedev@${droplet.ipv4_address}"
   }
 }
 
