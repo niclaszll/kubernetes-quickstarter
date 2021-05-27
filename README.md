@@ -98,8 +98,7 @@ terraform destroy -var "do_token=${DO_PAT}" -var "pvt_key=/Users/<USERNAME>/.ssh
 Load balancers will be destroyed through a destroy-time provisioner, using the DigitalOcean API, as they are not directly managed by Terraform.
 
 **TODO**
-- fix worker node (assigned, but status=down in LB)
-- Domain and https
+- https
 - master post install
 
 ## Use Ingress to access Pods without a domain (for local testing)

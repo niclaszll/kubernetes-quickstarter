@@ -1,5 +1,1 @@
 .DS_Store
-.vagrant/
-src/*
-setup/join-command
-!src/load-testing

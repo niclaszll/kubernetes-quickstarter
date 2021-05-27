@@ -1,0 +1,4 @@
+.vagrant/
+setup/join-command
+src/*
+!src/load-testing
