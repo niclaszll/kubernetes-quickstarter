@@ -1,34 +1,6 @@
 # Kubernetes Setup
 
-Multi node Kubernetes cluster setup with [kube-prometheus-stack](https://github.com/prometheus-operator/kube-prometheus) for local development based on Vagrant and cloud deployment on DigitalOcean.
-
-## Local Development with Virtualbox, Vagrant and Ansible
-
-### Install necessary tools
-
-```sh
-brew install --cask virtualbox
-brew install --cask vagrant
-brew install ansible
-ansible-galaxy collection install community.kubernetes
-```
-
-You may also use the official installers (especially on Windows).
-
-### Usage
-
-Start VM:
-
-```sh
-vagrant up
-```
-
-Connect to VM:
-
-```sh
-vagrant ssh master
-vagrant ssh worker
-```
+Multi node Kubernetes cluster setup with [kube-prometheus-stack](https://github.com/prometheus-operator/kube-prometheus) for local development and cloud deployment on DigitalOcean.
 
 ## Cloud Deployment with Terraform and Ansible
 
@@ -101,7 +73,35 @@ Load balancers will be destroyed through a destroy-time provisioner, using the D
 - https
 - master post install
 
-## Use Ingress to access Pods without a domain (for local testing)
+## Local Development with Virtualbox, Vagrant and Ansible
+
+### Install necessary tools
+
+```sh
+brew install --cask virtualbox
+brew install --cask vagrant
+brew install ansible
+ansible-galaxy collection install community.kubernetes
+```
+
+You may also use the official installers (especially on Windows).
+
+### Usage
+
+Start VM:
+
+```sh
+vagrant up
+```
+
+Connect to VM:
+
+```sh
+vagrant ssh master
+vagrant ssh worker
+```
+
+### Use Ingress to access Pods without a domain (for local testing)
 
 Add the following rule to your hosts file:
 
