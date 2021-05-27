@@ -1,0 +1,122 @@
+---
+- hosts: all
+  tasks:
+    - name: Update hosts entry with correct IP
+      become: true
+      shell: sed 's/127\.0\.2\.1/192\.168\.99\.101/g' -i /etc/hosts
+
+    - name: Install packages that allow apt to be used over HTTPS
+      become: true
+      apt:
+        name: "{{ packages }}"
+        state: present
+        update_cache: yes
+      vars:
+        packages:
+          - apt-transport-https
+          - ca-certificates
+          - curl
+          - gnupg-agent
+          - software-properties-common
+
+    - name: Install additional necessary packages
+      become: true
+      apt:
+        name: "{{ packages }}"
+        state: present
+        update_cache: yes
+      vars:
+        packages:
+          - mosquitto-clients
+          - nfs-common
+          - sshpass
+
+    - name: Add an apt signing key for Docker
+      become: true
+      apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+
+    - name: Add apt repository for stable version
+      become: true
+      apt_repository:
+        repo: deb [arch=amd64] https://download.docker.com/linux/ubuntu xenial stable
+        state: present
+
+    - name: Install docker and its dependecies
+      become: true
+      apt:
+        name: "{{ packages }}"
+        state: present
+        update_cache: yes
+      vars:
+        packages:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+      notify:
+        - docker status
+
+    - name: Add vagrant user to docker group
+      become: true
+      user:
+        name: vagrant
+        group: docker
+
+    - name: Remove swapfile from /etc/fstab
+      become: true
+      mount:
+        name: "{{ item }}"
+        fstype: swap
+        state: absent
+      with_items:
+        - swap
+        - none
+
+    - name: Disable swap
+      become: true
+      command: swapoff -a
+      when: ansible_swaptotal_mb > 0
+
+    - name: Add an apt signing key for Kubernetes
+      become: true
+      apt_key:
+        url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
+        state: present
+
+    - name: Adding apt repository for Kubernetes
+      become: true
+      apt_repository:
+        repo: deb https://apt.kubernetes.io/ kubernetes-xenial main
+        state: present
+        filename: kubernetes.list
+
+    - name: Install Kubernetes binaries
+      become: true
+      apt:
+        name: "{{ packages }}"
+        state: present
+        update_cache: yes
+      vars:
+        packages:
+          - kubelet
+          - kubeadm
+          - kubectl
+
+    - name: Restart kubelet
+      become: true
+      service:
+        name: kubelet
+        daemon_reload: yes
+        state: restarted
+
+    - name: Copy the join command to server location
+      copy: src=join-command dest=/tmp/join-command.sh mode=0777
+
+    - name: Join the node to cluster
+      become: true
+      command: sh /tmp/join-command.sh
+
+  handlers:
+    - name: docker status
+      service: name=docker state=started

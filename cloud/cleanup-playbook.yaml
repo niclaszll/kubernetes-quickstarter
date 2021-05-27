@@ -1,0 +1,21 @@
+---
+- hosts: localhost
+  tasks:
+    - name: Get all LBs
+      uri:
+        url: https://api.digitalocean.com/v2/load_balancers
+        return_content: yes
+        headers:
+          Content-Type: "application/json"
+          Authorization: "Bearer {{ lookup('env','DO_PAT') }}"
+      register: lb_result
+
+    - name: Delete all LBs
+      uri:
+        url: https://api.digitalocean.com/v2/load_balancers/{{ item }}
+        method: DELETE
+        status_code: [204]
+        headers:
+          Content-Type: "application/json"
+          Authorization: "Bearer {{ lookup('env','DO_PAT') }}"
+      loop: "{{ lb_result.json | json_query('load_balancers[*].id')}}"

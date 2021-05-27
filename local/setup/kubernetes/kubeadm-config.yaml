@@ -1,0 +1,26 @@
+apiVersion: kubeadm.k8s.io/v1beta2
+kind: InitConfiguration
+localAPIEndpoint:
+  advertiseAddress: 192.168.99.100
+  bindPort: 6443
+---
+apiVersion: kubeadm.k8s.io/v1beta2
+kind: ClusterConfiguration
+clusterName: local-dev
+networking:
+  podSubnet: "10.100.0.1/24"
+apiServer:
+  CertSANs:
+    - "192.168.99.100"
+controllerManager:
+  extraArgs:
+    "bind-address": "0.0.0.0"
+    "port": "10252"
+scheduler:
+  extraArgs:
+    "bind-address": "0.0.0.0"
+    "port": "10251"
+---
+apiVersion: kubeproxy.config.k8s.io/v1alpha1
+kind: KubeProxyConfiguration
+metricsBindAddress: "0.0.0.0:10249"
