@@ -19,9 +19,9 @@
       lineinfile:
         path: /etc/sudoers
         state: present
-        regexp: '^%developers'
-        line: '%developers ALL=(ALL) NOPASSWD: ALL'
-        validate: 'visudo -cf %s'
+        regexp: "^%developers"
+        line: "%developers ALL=(ALL) NOPASSWD: ALL"
+        validate: "visudo -cf %s"
 
     - name: Add the user 'kubedev'
       ansible.builtin.user:
@@ -262,7 +262,7 @@
     - name: Deploy Ingress
       become: true
       become_user: kubedev
-      shell: "kubectl create -f /home/kubedev/setup/kubernetes/ingress.yaml"
+      shell: kubectl create -f /home/kubedev/setup/kubernetes/ingress.yaml
 
     - name: Install helm
       shell: "{{ item }}"
@@ -270,6 +270,22 @@
         - curl -fsSL -o /tmp/get_helm.sh https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3
         - chmod 700 /tmp/get_helm.sh
         - /tmp/get_helm.sh
+
+    # unfortunately using community.kubernetes.helm doesn't work correctly ("no token found"), use shell instead
+    - name: Add ExternalDNS Repo
+      become: true
+      become_user: kubedev
+      shell: helm repo add bitnami https://charts.bitnami.com/bitnami
+
+    - name: Update helm (not working via update_repo_cache)
+      become: true
+      become_user: kubedev
+      shell: helm repo update
+
+    - name: Deploy ExternalDNS to automatically Manage DNS Records
+      become: true
+      become_user: kubedev
+      shell: helm install external-dns bitnami/external-dns --set provider=digitalocean,digitalocean.apiToken="{{ do_token }}",interval="1m",policy=sync -n kube-system
 
     - name: Add prometheus-community helm repo
       become: true

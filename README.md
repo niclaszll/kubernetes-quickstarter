@@ -58,9 +58,9 @@ You will be prompted to save and name the key.
 Generating public/private rsa key pair. Enter file in which to save the key (/Users/USER/.ssh/id_rsa): 
 ```
 
-This will generate two files, by default called `id_rsa` and `id_rsa.pub`. Next, copy and paste the contents of the .pub file, typically `id_rsa.pub`, into the SSH key content field in the `Add SSH Key` section under your [DigitalOcean account security settings](https://cloud.digitalocean.com/account/security).
+This will generate two files, by default called `id_rsa` and `id_rsa.pub`. Next, copy and paste the contents of the .pub file, typically `id_rsa.pub`, into the SSH key content field in the `Add SSH Key` section under your [DigitalOcean account security settings](https://cloud.digitalocean.com/account/security). For more information, see [DigitalOcean Docs](https://docs.digitalocean.com/products/droplets/how-to/add-ssh-keys/to-account/).
 
-For more information, see [DigitalOcean Docs](https://docs.digitalocean.com/products/droplets/how-to/add-ssh-keys/to-account/).
+To use your own domain, you first need to add it to your DigitalOcean account and [update your domain’s NS records to point to DigitalOcean’s name servers](https://www.digitalocean.com/community/tutorials/how-to-point-to-digitalocean-nameservers-from-common-domain-registrars). After that change the domains under `terraform/setup/kubernetes/ingress.yaml` from *.priobike-demo.de to your own domain. Later, the necessary A-records are automatically created via [ExternalDNS](https://github.com/kubernetes-sigs/external-dns) to point the domain to the load balancer.
 
 **Terraform**
 
@@ -95,14 +95,14 @@ Destroy resources:
 terraform destroy -var "do_token=${DO_PAT}" -var "pvt_key=/Users/<USERNAME>/.ssh/id_rsa" -var "pub_key=/Users/<USERNAME>/.ssh/id_rsa.pub" -auto-approve
 ```
 
-Don't forget to manually delete the provisioned load balancer(s) as they are not managed and destroyed by Terraform!
+Load balancers will be destroyed through a destroy-time provisioner, using the DigitalOcean API, as they are not directly managed by Terraform.
 
 **TODO**
 - fix worker node (assigned, but status=down in LB)
 - Domain and https
 - master post install
 
-## Use Ingress to access Pods without a domain (for testing)
+## Use Ingress to access Pods without a domain (for local testing)
 
 Add the following rule to your hosts file:
 
