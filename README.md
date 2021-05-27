@@ -4,19 +4,9 @@ Multi node Kubernetes cluster setup with [kube-prometheus-stack](https://github.
 
 ## Cloud Deployment with Terraform and Ansible
 
-### Install necessary tools
+Make sure you have [Ansible](https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html), the [Ansible Kubernetes Collection](https://galaxy.ansible.com/community/kubernetes) and [Terraform](https://learn.hashicorp.com/tutorials/terraform/install-cli) installed on your system.
 
-```sh
-brew install ansible
-brew install terraform
-ansible-galaxy collection install community.kubernetes
-```
-
-You may also use the official installers (especially on Windows).
-
-### Setup development environment
-
-**Digital Ocean**
+### Setup Digital Ocean
 
 You will need to add a new SSH keypair to your DigitalOcean account. Open a terminal and run the following command:
 
@@ -27,14 +17,14 @@ ssh-keygen
 You will be prompted to save and name the key.
 
 ```
-Generating public/private rsa key pair. Enter file in which to save the key (/Users/USER/.ssh/id_rsa): 
+Generating public/private rsa key pair. Enter file in which to save the key (/Users/USER/.ssh/id_rsa):
 ```
 
-This will generate two files, by default called `id_rsa` and `id_rsa.pub`. Next, copy and paste the contents of the .pub file, typically `id_rsa.pub`, into the SSH key content field in the `Add SSH Key` section under your [DigitalOcean account security settings](https://cloud.digitalocean.com/account/security). For more information, see [DigitalOcean Docs](https://docs.digitalocean.com/products/droplets/how-to/add-ssh-keys/to-account/).
+This will generate two files, by default called `id_rsa` and `id_rsa.pub`. Next, copy and paste the contents of the .pub file, typically `id_rsa.pub`, into the SSH key content field in the `Add SSH Key` section under your [DigitalOcean account security settings](https://cloud.digitalocean.com/account/security). For more information, see the [DigitalOcean Docs](https://docs.digitalocean.com/products/droplets/how-to/add-ssh-keys/to-account/).
 
-To use your own domain, you first need to add it to your DigitalOcean account and [update your domain’s NS records to point to DigitalOcean’s name servers](https://www.digitalocean.com/community/tutorials/how-to-point-to-digitalocean-nameservers-from-common-domain-registrars). After that change the domains under `terraform/setup/kubernetes/ingress.yaml` from *.priobike-demo.de to your own domain. Later, the necessary A-records are automatically created via [ExternalDNS](https://github.com/kubernetes-sigs/external-dns) to point the domain to the load balancer.
+To use your own domain, you first need to add it to your DigitalOcean account and [update your domain’s NS records to point to DigitalOcean’s name servers](https://www.digitalocean.com/community/tutorials/how-to-point-to-digitalocean-nameservers-from-common-domain-registrars). After that change the domains under `terraform/setup/kubernetes/ingress.yaml` from \*.priobike-demo.de to your own domain. Later, the necessary A-records are automatically created via [ExternalDNS](https://github.com/kubernetes-sigs/external-dns) to point the domain to the load balancer.
 
-**Terraform**
+### Setup Terraform
 
 You first need to [create a Personal Access Token in DigitalOcean](https://docs.digitalocean.com/reference/api/create-personal-access-token/). Terraform will use your DigitalOcean Personal Access Token to communicate with the DigitalOcean API and manage resources in your account. **Don’t share this key with others, and keep it out of scripts and version control!** Export your DigitalOcean Personal Access Token to an environment variable called `DO_PAT`. This will make using it in subsequent commands easier and keep it separate from your code:
 
@@ -53,38 +43,33 @@ export TF_LOG=1
 ### Usage
 
 Provision resources:
+
 ```sh
 terraform apply -var "do_token=${DO_PAT}" -var "pvt_key=/Users/<USERNAME>/.ssh/id_rsa" -var "pub_key=/Users/<USERNAME>/.ssh/id_rsa.pub" -auto-approve
 ```
 
 Connect to node:
+
 ```sh
 ssh -i /Users/<USERNAME>/.ssh/id_rsa kubedev@<NODE_IP>
 ```
 
 Destroy resources:
+
 ```sh
 terraform destroy -var "do_token=${DO_PAT}" -var "pvt_key=/Users/<USERNAME>/.ssh/id_rsa" -var "pub_key=/Users/<USERNAME>/.ssh/id_rsa.pub" -auto-approve
 ```
 
 Load balancers will be destroyed through a destroy-time provisioner, using the DigitalOcean API, as they are not directly managed by Terraform.
 
-**TODO**
+### TODO
+
 - https
 - master post install
 
 ## Local Development with Virtualbox, Vagrant and Ansible
 
-### Install necessary tools
-
-```sh
-brew install --cask virtualbox
-brew install --cask vagrant
-brew install ansible
-ansible-galaxy collection install community.kubernetes
-```
-
-You may also use the official installers (especially on Windows).
+Make sure you have [VirtualBox](https://www.virtualbox.org/), [Vagrant](https://www.vagrantup.com/docs/installation), [Ansible](https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html) and the [Ansible Kubernetes Collection](https://galaxy.ansible.com/community/kubernetes) installed on your system.
 
 ### Usage
 
