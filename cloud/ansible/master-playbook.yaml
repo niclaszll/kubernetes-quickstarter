@@ -165,13 +165,13 @@
         regexp: "vProviderID"
         replace: "digitalocean://{{ droplet_id.stdout }}"
 
-    - name: Replace localAPIEndpoint.advertiseAddress with correct IP
+    - name: Set localAPIEndpoint.advertiseAddress to correct IP
       replace:
         path: /tmp/setup/kubernetes/kubeadm-config.yaml
         regexp: "vAdvertiseAddress"
         replace: "{{ public_ip.stdout }}"
 
-    - name: Replace apiServer.CertSANs with correct IP
+    - name: Set apiServer.CertSANs to correct IP
       replace:
         path: /tmp/setup/kubernetes/kubeadm-config.yaml
         regexp: "vCertSANs"
@@ -253,6 +253,12 @@
       retries: 20
       delay: 15
 
+    - name: Add correct domain to ingress
+      replace:
+        path: /tmp/setup/kubernetes/ingress.yaml
+        regexp: "vDomain"
+        replace: "{{ domain }}"
+
     - name: Deploy Ingress
       become: true
       become_user: kubedev
@@ -300,6 +306,15 @@
         create_namespace: true
         values:
           installCRDs: true
+
+    - name: Set spec.acme.email to correct email address
+      replace:
+        path: "{{ item }}"
+        regexp: "vACMEMailAddress"
+        replace: "{{ acme_mail }}"
+      with_items:
+        - /tmp/setup/kubernetes/issuer-staging.yaml
+        - /tmp/setup/kubernetes/issuer-production.yaml
 
     - name: Wait for cert-manager to be fully provisioned
       become: true

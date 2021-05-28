@@ -9,12 +9,12 @@ metadata:
 spec:
   tls:
   - hosts:
-    - grafana.priobike-demo.de
-    - prometheus.priobike-demo.de
-    - alertmanager.priobike-demo.de
+    - grafana.vDomain
+    - prometheus.vDomain
+    - alertmanager.vDomain
     secretName: priobike-tls
   rules:
-    - host: grafana.priobike-demo.de
+    - host: grafana.vDomain
       http:
         paths:
           - path: /
@@ -24,7 +24,7 @@ spec:
                 name: prometheus-grafana
                 port:
                   number: 3000
-    - host: prometheus.priobike-demo.de
+    - host: prometheus.vDomain
       http:
         paths:
           - path: /
@@ -34,7 +34,7 @@ spec:
                 name: prometheus-operated
                 port:
                   number: 9090
-    - host: alertmanager.priobike-demo.de
+    - host: alertmanager.vDomain
       http:
         paths:
           - path: /

@@ -22,7 +22,7 @@ Generating public/private rsa key pair. Enter file in which to save the key (/Us
 
 This will generate two files, by default called `id_rsa` and `id_rsa.pub`. Next, copy and paste the contents of the .pub file, typically `id_rsa.pub`, into the SSH key content field in the `Add SSH Key` section under your [DigitalOcean account security settings](https://cloud.digitalocean.com/account/security). For more information, see the [DigitalOcean Docs](https://docs.digitalocean.com/products/droplets/how-to/add-ssh-keys/to-account/).
 
-To use your own domain, you first need to add it to your DigitalOcean account and [update your domain’s NS records to point to DigitalOcean’s name servers](https://www.digitalocean.com/community/tutorials/how-to-point-to-digitalocean-nameservers-from-common-domain-registrars). After that change the domains under `terraform/setup/kubernetes/ingress.yaml` from \*.priobike-demo.de to your own domain. Later, the necessary A-records are automatically created via [ExternalDNS](https://github.com/kubernetes-sigs/external-dns) to point the domain to the load balancer.
+To use your own domain, you need to add it to your DigitalOcean account and [update your domain’s NS records to point to DigitalOcean’s name servers](https://www.digitalocean.com/community/tutorials/how-to-point-to-digitalocean-nameservers-from-common-domain-registrars). Later, all necessary A-records are automatically created via [ExternalDNS](https://github.com/kubernetes-sigs/external-dns) to point the domain to the load balancer.
 
 ### Setup Terraform
 
@@ -40,31 +40,32 @@ You may also want to enable logging to Standard Output (STDOUT), so you can see 
 export TF_LOG=1
 ```
 
+Now make a copy of `terraform.tfvars.example`, rename it to `terraform.tfvars` and define all variables within.
+
 ### Usage
 
 Provision resources:
 
 ```sh
-terraform apply -var "do_token=${DO_PAT}" -var "pvt_key=/Users/<USERNAME>/.ssh/id_rsa" -var "pub_key=/Users/<USERNAME>/.ssh/id_rsa.pub" -auto-approve
+terraform apply -var "do_token=${DO_PAT}" -auto-approve
 ```
 
-Connect to node:
-
-```sh
-ssh -i /Users/<USERNAME>/.ssh/id_rsa kubedev@<NODE_IP>
-```
+SSH connection details will be printed to your console once Terraform has successfully finished provisioning all resources.
 
 Destroy resources:
 
 ```sh
-terraform destroy -var "do_token=${DO_PAT}" -var "pvt_key=/Users/<USERNAME>/.ssh/id_rsa" -var "pub_key=/Users/<USERNAME>/.ssh/id_rsa.pub" -auto-approve
+terraform destroy -var "do_token=${DO_PAT}" -auto-approve
 ```
 
 Load balancers will be destroyed through a destroy-time provisioner, using the DigitalOcean API, as they are not directly managed by Terraform.
 
+### Access monitoring applications
+
+Grafana, Prometheus and the Alertmanager are respectively accessible on the subdomains `grafana.*`, `prometheus.*` and `alertmanager.*` of your Domain. It may take a few seconds till all pods are started.
+
 ### TODO
 
-- https
 - master post install
 
 ## Local Development with Virtualbox, Vagrant and Ansible
@@ -84,25 +85,4 @@ Connect to VM:
 ```sh
 vagrant ssh master
 vagrant ssh worker
-```
-
-### Use Ingress to access Pods without a domain (for local testing)
-
-Add the following rule to your hosts file:
-
-```
-<EXTERNAL_IP_OF_YOUR_NGINX_INGRESS_SVC> grafana.kube-local.com prometheus.kube-local.com alertmanager.kube-local.com
-```
-
-Afterwards you can access Grafana, Prometheus and the Alertmanager by their respective URLs: [grafana.kube-local.com](http://grafana.kube-local.com), [prometheus.kube-local.com](http://prometheus.kube-local.com) and [alertmanager.kube-local.com](http://alertmanager.kube-local.com).
-
-Default Grafana credentials:
-
-- Username: `admin`
-- Password: `prom-operator`
-
-If this combination does not work, you can alternatively get the password with the following command:
-
-```sh
-kubectl get secret --namespace monitoring prometheus-grafana -o jsonpath="{.data.admin-password}" | base64 --decode ; echo
 ```

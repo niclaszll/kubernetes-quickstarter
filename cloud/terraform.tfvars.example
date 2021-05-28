@@ -1,0 +1,4 @@
+pvt_key = "PATH TO PRIVATE SSH KEY"
+pub_key = "PATH TO PUBLIC SSH KEY"
+domain = "DOMAIN TO ACCESS CLUSTER LB"
+acme_mail = "ACME EMAIL"
