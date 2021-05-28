@@ -3,7 +3,7 @@ resource "digitalocean_droplet" "master" {
   image  = "ubuntu-20-04-x64"
   name   = "master-${count.index}"
   region = "fra1"
-  size   = "s-2vcpu-2gb"
+  size   = "s-2vcpu-4gb"
   private_networking  = true
 
   ssh_keys = [

@@ -5,7 +5,14 @@ metadata:
   namespace: monitoring
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /
+    cert-manager.io/cluster-issuer: "letsencrypt-staging"
 spec:
+  tls:
+  - hosts:
+    - grafana.priobike-demo.de
+    - prometheus.priobike-demo.de
+    - alertmanager.priobike-demo.de
+    secretName: priobike-tls
   rules:
     - host: grafana.priobike-demo.de
       http:
@@ -24,7 +31,7 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: prometheus-kube-prometheus-prometheus
+                name: prometheus-operated
                 port:
                   number: 9090
     - host: alertmanager.priobike-demo.de
