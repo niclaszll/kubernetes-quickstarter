@@ -152,39 +152,33 @@
         daemon_reload: yes
         state: restarted
 
-    - name: Copy kubeadm config
-      become: true
-      become_user: kubedev
-      copy:
-        src: ./setup/kubernetes/kubeadm-config.yaml
-        dest: /tmp/kubeadm-config.yaml
-
-    - name: Configure kubelet for digitalocean-cloud-controller-manager
-      replace:
-        path: /tmp/kubeadm-config.yaml
-        regexp: "vProviderID"
-        replace: "digitalocean://{{ droplet_id.stdout }}"
-
-    # TODO: use ansibles lineinfile
-    - name: Replace localAPIEndpoint.advertiseAddress with correct IP
-      shell: sed -i "s/vAdvertiseAddress/{{ public_ip.stdout }}/g" /tmp/kubeadm-config.yaml
-
-    - name: Replace apiServer.CertSANs with correct IP
-      shell: sed -i "s/vCertSANs/{{ public_ip.stdout }}/g" /tmp/kubeadm-config.yaml
-
-    - name: Replace apiServer.CertSANs with correct IP
-      shell: cat /tmp/kubeadm-config.yaml
-
-    - name: Initialize the Kubernetes cluster using kubeadm
-      command: kubeadm init --config=/tmp/kubeadm-config.yaml
-
-      # TODO: cleanup
     - name: Copy whole setup folder
       become: true
       become_user: kubedev
       copy:
-        src: ./setup/
-        dest: /home/kubedev/setup/
+        src: ../setup/
+        dest: /tmp/setup/
+
+    - name: Configure kubelet for digitalocean-cloud-controller-manager
+      replace:
+        path: /tmp/setup/kubernetes/kubeadm-config.yaml
+        regexp: "vProviderID"
+        replace: "digitalocean://{{ droplet_id.stdout }}"
+
+    - name: Replace localAPIEndpoint.advertiseAddress with correct IP
+      replace:
+        path: /tmp/setup/kubernetes/kubeadm-config.yaml
+        regexp: "vAdvertiseAddress"
+        replace: "{{ public_ip.stdout }}"
+
+    - name: Replace apiServer.CertSANs with correct IP
+      replace:
+        path: /tmp/setup/kubernetes/kubeadm-config.yaml
+        regexp: "vCertSANs"
+        replace: "{{ public_ip.stdout }}"
+
+    - name: Initialize the Kubernetes cluster using kubeadm
+      command: kubeadm init --config=/tmp/setup/kubernetes/kubeadm-config.yaml
 
     - name: Setup kubeconfig for kubedev user
       command: "{{ item }}"
@@ -262,7 +256,7 @@
     - name: Deploy Ingress
       become: true
       become_user: kubedev
-      shell: kubectl create -f /home/kubedev/setup/kubernetes/ingress.yaml
+      shell: kubectl create -f /tmp/setup/kubernetes/ingress.yaml
 
     - name: Install helm
       shell: "{{ item }}"
@@ -320,7 +314,7 @@
     - name: Deploy staging issuer
       become: true
       become_user: kubedev
-      shell: kubectl create -f /home/kubedev/setup/kubernetes/issuer-staging.yaml
+      shell: kubectl create -f /tmp/setup/kubernetes/issuer-staging.yaml
 
     - name: Add prometheus-community helm repo
       become: true
