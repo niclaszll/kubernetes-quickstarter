@@ -64,6 +64,17 @@ resource "digitalocean_droplet" "worker" {
   }
 }
 
+resource "null_resource" "master-post-install" {
+
+  depends_on = [
+    digitalocean_droplet.worker,
+  ]
+
+  provisioner "local-exec" {
+    command = "ANSIBLE_HOST_KEY_CHECKING=False ANSIBLE_FORCE_COLOR=true ansible-playbook -v -u root -i '${digitalocean_droplet.master[0].ipv4_address},' --private-key ${var.pvt_key} -e 'pub_key=${var.pub_key} public_ip=${digitalocean_droplet.master[0].ipv4_address} client_ip=${digitalocean_droplet.worker[0].ipv4_address}' ansible/master-post-install-playbook.yaml"
+  }
+}
+
 output "master_droplet_ssh_connection" {
   value = {
     for droplet in digitalocean_droplet.master:

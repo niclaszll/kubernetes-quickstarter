@@ -304,6 +304,7 @@
         update_repo_cache: yes
         release_namespace: cert-manager
         create_namespace: true
+        wait: yes
         values:
           installCRDs: true
 
@@ -350,14 +351,6 @@
         values:
           prometheus.prometheusSpec.podMonitorSelectorNilUsesHelmValues: false
           prometheus.prometheusSpec.serviceMonitorSelectorNilUsesHelmValues: false
-
-    - name: Set up NFS
-      shell: "{{ item }}"
-      with_items:
-        - mkdir /var/nfs/general -p
-        - chown nobody:nogroup /var/nfs/general
-        - echo '/var/nfs/general    *(rw,sync,no_subtree_check,no_root_squash,no_all_squash,insecure)' | sudo tee -a /etc/exports
-        - systemctl restart nfs-kernel-server
 
   handlers:
     - name: docker status

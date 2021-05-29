@@ -66,7 +66,7 @@ Grafana, Prometheus and the Alertmanager are respectively accessible on the subd
 
 ### TODO
 
-- master post install
+- https://github.com/digitalocean/csi-digitalocean#installing-to-kubernetes
 
 ## Local Development with Virtualbox, Vagrant and Ansible
 

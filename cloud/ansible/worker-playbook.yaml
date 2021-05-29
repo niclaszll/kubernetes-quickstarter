@@ -136,7 +136,7 @@
         daemon_reload: yes
         state: restarted
 
-    - name: Copy the join command to server location
+    - name: Copy the join command to remote location
       copy: src=join-command dest=/tmp/join-command.sh mode=0777
 
     - name: Join the node to cluster
