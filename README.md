@@ -64,10 +64,6 @@ Load balancers will be destroyed through a destroy-time provisioner, using the D
 
 Grafana, Prometheus and the Alertmanager are respectively accessible on the subdomains `grafana.*`, `prometheus.*` and `alertmanager.*` of your Domain. It may take a few seconds till all pods are started.
 
-### TODO
-
-- https://github.com/digitalocean/csi-digitalocean#installing-to-kubernetes
-
 ## Local Development with Virtualbox, Vagrant and Ansible
 
 Make sure you have [VirtualBox](https://www.virtualbox.org/), [Vagrant](https://www.vagrantup.com/docs/installation), [Ansible](https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html) and the [Ansible Kubernetes Collection](https://galaxy.ansible.com/community/kubernetes) installed on your system.
