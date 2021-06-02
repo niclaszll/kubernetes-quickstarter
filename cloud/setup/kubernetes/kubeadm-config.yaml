@@ -10,7 +10,7 @@ nodeRegistration:
 ---
 apiVersion: kubeadm.k8s.io/v1beta2
 kind: ClusterConfiguration
-clusterName: local-dev
+clusterName: cloud-dev
 networking:
   podSubnet: "10.244.0.0/16"
 apiServer:

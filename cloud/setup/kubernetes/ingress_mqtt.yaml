@@ -1,3 +1,4 @@
+# not necessary, since mqtt is only needed within cluster
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
