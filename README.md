@@ -42,7 +42,15 @@ export TF_LOG=1
 
 Now make a copy of `terraform.tfvars.example`, rename it to `terraform.tfvars` and define all variables within.
 
+To initialize Terraform, run the following command once inside the `cloud` directory:
+
+```sh
+terraform init
+```
+
 ### Usage
+
+_Run the following commands inside the `cloud` directory._
 
 Provision resources:
 
@@ -69,6 +77,8 @@ Grafana, Prometheus and the Alertmanager are respectively accessible on the subd
 Make sure you have [VirtualBox](https://www.virtualbox.org/), [Vagrant](https://www.vagrantup.com/docs/installation), [Ansible](https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html) and the [Ansible Kubernetes Collection](https://galaxy.ansible.com/community/kubernetes) installed on your system.
 
 ### Usage
+
+_Run the following commands inside the `local` directory._
 
 Start VM:
 
