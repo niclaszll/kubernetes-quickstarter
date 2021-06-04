@@ -371,6 +371,17 @@
           prometheus.prometheusSpec.podMonitorSelectorNilUsesHelmValues: false
           prometheus.prometheusSpec.serviceMonitorSelectorNilUsesHelmValues: false
 
+    - name: Deploy prometheus-adapter
+      become: true
+      become_user: kubedev
+      community.kubernetes.helm:
+        name: prometheus-adapter
+        chart_ref: prometheus-community/prometheus-adapter
+        update_repo_cache: yes
+        release_namespace: monitoring
+        values_files:
+          - /tmp/setup/helm/prometheus-adapter-values.yaml
+
   handlers:
     - name: docker status
       service: name=docker state=started

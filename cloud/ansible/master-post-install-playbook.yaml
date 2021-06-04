@@ -2,36 +2,6 @@
 - hosts: all
   become: true
   tasks:
-    # - name: Set up NFS
-    #   shell: "{{ item }}"
-    #   with_items:
-    #     - mkdir /var/nfs/general -p
-    #     - chown nobody:nogroup /var/nfs/general
-    #     - echo '/var/nfs/general    {{ client_ip }}(rw,sync,no_subtree_check,no_root_squash,no_all_squash,insecure)' | sudo tee -a /etc/exports
-    #     - systemctl restart nfs-kernel-server
-
-    # - name: Install nfs-subdir-external-provisioner repo
-    #   become: true
-    #   become_user: kubedev
-    #   community.kubernetes.helm_repository:
-    #     name: nfs-subdir-external-provisioner
-    #     repo_url: "https://kubernetes-sigs.github.io/nfs-subdir-external-provisioner"
-
-    # - name: Deploy nfs-subdir-external-provisioner
-    #   become: true
-    #   become_user: kubedev
-    #   community.kubernetes.helm:
-    #     name: my-nfs-subdir-external-provisioner
-    #     chart_ref: nfs-subdir-external-provisioner/nfs-subdir-external-provisioner
-    #     update_repo_cache: yes
-    #     release_namespace: default
-    #     wait: yes
-    #     force: yes
-    #     values:
-    #       nfs.server: "{{ public_ip }}"
-    #       nfs.path: /var/nfs/general
-    #       storageClass.defaultClass: true
-
     # - name: Clone mongo-kubernetes-operator
     #   ansible.builtin.git:
     #     repo: https://github.com/mongodb/mongodb-kubernetes-operator.git
