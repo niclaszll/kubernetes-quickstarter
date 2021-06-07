@@ -48,7 +48,7 @@ spec:
             name: data-volume
           spec:
             accessModes: ["ReadWriteOnce"]
-            storageClassName: nfs-client
+            storageClassName: do-block-storage
             resources:
               requests:
                 storage: 10G
@@ -56,10 +56,10 @@ spec:
             name: logs-volume
           spec:
             accessModes: ["ReadWriteOnce"]
-            storageClassName: nfs-client
+            storageClassName: do-block-storage
             resources:
               requests:
-                storage: 1G
+                storage: 1Gi
 # the user credentials will be generated from this secret
 # once the credentials are generated, this secret is no longer required
 ---

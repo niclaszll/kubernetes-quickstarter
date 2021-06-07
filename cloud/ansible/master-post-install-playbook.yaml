@@ -2,27 +2,27 @@
 - hosts: all
   become: true
   tasks:
-    # - name: Clone mongo-kubernetes-operator
-    #   ansible.builtin.git:
-    #     repo: https://github.com/mongodb/mongodb-kubernetes-operator.git
-    #     dest: /tmp/mongo-operator
+    - name: Clone mongo-kubernetes-operator
+      ansible.builtin.git:
+        repo: https://github.com/mongodb/mongodb-kubernetes-operator.git
+        dest: /tmp/mongo-operator
 
-    # - name: Deploy mongo-kubernetes-operator
-    #   become: true
-    #   become_user: kubedev
-    #   shell: "{{ item }}"
-    #   with_items:
-    #     - kubectl apply -f /tmp/mongo-operator/config/crd/bases/mongodbcommunity.mongodb.com_mongodbcommunity.yaml
-    #       # Install necessary roles and role-bindings
-    #     - kubectl create ns mongo
-    #     - kubectl apply -k /tmp/mongo-operator/config/rbac/ -n mongo
-    #       # Install Operator
-    #     - kubectl create -f /tmp/mongo-operator/config/manager/manager.yaml -n mongo
+    - name: Deploy mongo-kubernetes-operator
+      become: true
+      become_user: kubedev
+      shell: "{{ item }}"
+      with_items:
+        - kubectl apply -f /tmp/mongo-operator/config/crd/bases/mongodbcommunity.mongodb.com_mongodbcommunity.yaml
+          # Install necessary roles and role-bindings
+        - kubectl create ns mongo
+        - kubectl apply -k /tmp/mongo-operator/config/rbac/ -n mongo
+          # Install Operator
+        - kubectl create -f /tmp/mongo-operator/config/manager/manager.yaml -n mongo
 
-    # - name: Deploy MongoDB
-    #   become: true
-    #   become_user: kubedev
-    #   shell: kubectl create -f /tmp/setup/kubernetes/mongo-config.yaml -n mongo
+    - name: Deploy MongoDB
+      become: true
+      become_user: kubedev
+      shell: kubectl create -f /tmp/setup/kubernetes/mongo-config.yaml -n mongo
 
     - name: Install VerneMQ repo
       become: true
