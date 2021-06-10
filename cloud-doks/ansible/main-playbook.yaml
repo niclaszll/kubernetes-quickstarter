@@ -32,10 +32,10 @@
         kind: Namespace
         state: present
 
-    - name: Deploy priobike-ingress chart from local path
+    - name: Deploy setup-ingress chart from local path
       community.kubernetes.helm:
-        name: priobike-ingress
-        chart_ref: ../setup/helm/charts/priobike-ingress
+        name: setup-ingress
+        chart_ref: ../setup/helm/charts/setup-ingress
         release_namespace: monitoring
         values:
           domain: "{{ domain }}"
@@ -76,10 +76,10 @@
       retries: 12
       delay: 10
 
-    - name: Deploy priobike-issuer chart from local path
+    - name: Deploy setup-issuer chart from local path
       community.kubernetes.helm:
-        name: priobike-issuer
-        chart_ref: ../setup/helm/charts/priobike-issuer
+        name: setup-issuer
+        chart_ref: ../setup/helm/charts/setup-issuer
         release_namespace: cert-manager
         values:
           acmeMail: "{{ acme_mail }}"
