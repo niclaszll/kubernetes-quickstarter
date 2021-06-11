@@ -21,23 +21,20 @@
           Authorization: "Bearer {{ lookup('env','DO_PAT') }}"
       loop: "{{ lb_result.json | json_query('load_balancers[*].id')}}"
 
-    # TODO: detach before deletion
+    - name: Get all block storages
+      uri:
+        url: https://api.digitalocean.com/v2/volumes?region=fra1
+        return_content: yes
+        headers:
+          Content-Type: "application/json"
+          Authorization: "Bearer {{ lookup('env','DO_PAT') }}"
+      register: bs_result
 
-    # - name: Get all block storages
-    #   uri:
-    #     url: https://api.digitalocean.com/v2/volumes?region=fra1
-    #     return_content: yes
-    #     headers:
-    #       Content-Type: "application/json"
-    #       Authorization: "Bearer {{ lookup('env','DO_PAT') }}"
-    #   register: bs_result
+    - include_tasks: detach-volumes.yaml
+      loop: "{{ bs_result.json | json_query('volumes[*]') }}"
+      loop_control:
+        loop_var: volume
 
-    # - name: Delete all block storages
-    #   uri:
-    #     url: https://api.digitalocean.com/v2/volumes/{{ item }}
-    #     method: DELETE
-    #     status_code: [204]
-    #     headers:
-    #       Content-Type: "application/json"
-    #       Authorization: "Bearer {{ lookup('env','DO_PAT') }}"
-    #   loop: "{{ bs_result.json | json_query('volumes[*].id')}}"
+    - name: Delete all block storages
+      shell: doctl compute volume delete {{ item }} -f
+      loop: "{{ bs_result.json | json_query('volumes[*].id')}}"
