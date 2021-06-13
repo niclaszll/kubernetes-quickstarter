@@ -97,6 +97,8 @@
         update_repo_cache: yes
         release_namespace: monitoring
         create_namespace: true
+        # 16.6.4 breaks kube-state-metrics monitoring, wait till fix
+        chart_version: 16.6.3
         values:
           prometheus.prometheusSpec.podMonitorSelectorNilUsesHelmValues: false
           prometheus.prometheusSpec.serviceMonitorSelectorNilUsesHelmValues: false
