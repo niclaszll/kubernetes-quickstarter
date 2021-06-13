@@ -1,5 +1,3 @@
 - name: Detach volumes
   shell: doctl compute volume-action detach {{ volume.id }} {{ item }}
   loop: "{{ volume.droplet_ids }}"
-  retries: 3
-  delay: 5

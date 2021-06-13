@@ -38,3 +38,8 @@
     - name: Delete all block storages
       shell: doctl compute volume delete {{ item }} -f
       loop: "{{ bs_result.json | json_query('volumes[*].id')}}"
+      # retry, sometimes block storage is not completely detached yet
+      retries: 3
+      delay: 5
+      register: bs_deletion_result
+      until: bs_deletion_result is not failed

@@ -5,3 +5,6 @@ additionalEnv:
     value: "on"
 serviceMonitor:
   create: true
+  labels:
+    release: prometheus
+envFrom: []

@@ -136,16 +136,26 @@
         namespace: mongo
         src: ../setup/kubernetes/mongo-config.yaml
 
-    - name: Install VerneMQ repo
-      community.kubernetes.helm_repository:
-        name: vernemq
-        repo_url: "https://vernemq.github.io/docker-vernemq"
+    # - name: Install VerneMQ repo
+    #   community.kubernetes.helm_repository:
+    #     name: vernemq
+    #     repo_url: "https://vernemq.github.io/docker-vernemq"
 
-    - name: Deploy VerneMQ
+    # - name: Deploy VerneMQ
+    #   community.kubernetes.helm:
+    #     name: vernemq
+    #     chart_ref: vernemq/vernemq
+    #     update_repo_cache: yes
+    #     release_namespace: mqtt
+    #     create_namespace: true
+    #     values_files:
+    #       - ../setup/helm/values/vernemq-helm-values.yaml
+
+    # use cloned repo for now, helm chart not updated yet
+    - name: Deploy VerneMQ from local path
       community.kubernetes.helm:
         name: vernemq
-        chart_ref: vernemq/vernemq
-        update_repo_cache: yes
+        chart_ref: ../setup/helm/charts/vernemq
         release_namespace: mqtt
         create_namespace: true
         values_files:
