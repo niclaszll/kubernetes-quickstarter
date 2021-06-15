@@ -162,3 +162,10 @@
         create_namespace: true
         values_files:
           - ../setup/helm/values/vernemq-helm-values.yaml
+
+    - name: Add custom Grafana dashboards
+      shell: "{{ item }}"
+      with_items: 
+        # mqtt dashboard
+        - kubectl -n monitoring create cm prometheus-kube-prometheus-mqtt --from-file ../setup/dashboards/mqtt.json
+        - kubectl -n monitoring label cm prometheus-kube-prometheus-mqtt grafana_dashboard="1"
