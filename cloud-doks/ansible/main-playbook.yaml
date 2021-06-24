@@ -2,28 +2,44 @@
 - hosts: localhost
   connection: local
   tasks:
-    - name: Add ingress-nginx repo
-      community.kubernetes.helm_repository:
-        name: ingress-nginx
-        repo_url: "https://kubernetes.github.io/ingress-nginx"
-
     - name: Install ingress-nginx
-      community.kubernetes.helm:
-        name: nginx-ingress
-        chart_ref: ingress-nginx/ingress-nginx
-        update_repo_cache: yes
-        release_namespace: ingress-nginx
-        create_namespace: true
-        values:
-          controller.publishService.enabled: true
+      shell: kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v0.47.0/deploy/static/provider/do/deploy.yaml
 
     - name: Wait for loadbalancer to be provisioned
-      shell: kubectl -n ingress-nginx get svc nginx-ingress-ingress-nginx-controller -o jsonpath='{.status.loadBalancer.ingress[0].ip}'
-      register: lb_result
-      until: lb_result.stdout | length > 0
+      shell: kubectl -n ingress-nginx get svc ingress-nginx-controller -o jsonpath='{.status.loadBalancer.ingress[0].ip}'
+      register: lb_ip
+      until: lb_ip.stdout | length > 0
       # max wait time 7m30s
       retries: 30
       delay: 15
+
+    # Enable Pod communication through the Load Balancer
+    # see step 5: https://www.digitalocean.com/community/tutorials/how-to-set-up-an-nginx-ingress-with-cert-manager-on-digitalocean-kubernetes
+    # check with "kubectl describe orders -A"
+    - name: List records
+      uri:
+        url: https://api.digitalocean.com/v2/domains/{{domain}}/records
+        return_content: yes
+        headers:
+          Content-Type: "application/json"
+          Authorization: "Bearer {{do_token}}"
+      register: domain_records
+
+    - name: Update A record if defined
+      shell: doctl compute domain records update {{domain}} --record-id {{a_records[0]}} --record-data {{lb_ip.stdout}} --record-ttl 300
+      when: a_records[0] is not undefined
+      vars:
+        a_records: '{{ domain_records.json | json_query("domain_records[?(@.type == ''A'' && @.name == ''lb'')].id")}}'
+
+    - name: Create A record if not defined
+      shell: doctl compute domain records create --record-type A --record-name lb --record-ttl 300 --record-data {{lb_ip.stdout}} {{domain}}
+      when: a_records[0] is undefined
+      vars:
+        a_records: '{{ domain_records.json | json_query("domain_records[?(@.type == ''A'' && @.name == ''lb'')].id")}}'
+
+    - include_tasks: ingress-nginx-digital-ocean-override.yaml
+      vars:
+        lb_domain: "lb.{{ domain }}"
 
     - name: Create monitoring namespace
       community.kubernetes.k8s:
@@ -51,6 +67,9 @@
     - name: Deploy ExternalDNS to automatically Manage DNS Records
       shell: helm install external-dns bitnami/external-dns --set provider=digitalocean,digitalocean.apiToken="{{ do_token }}",interval="1m",policy=sync -n kube-system
 
+    - name: Install cert-manager CRDs
+      shell: kubectl apply -f https://github.com/jetstack/cert-manager/releases/download/v1.3.1/cert-manager.crds.yaml
+
     - name: Add cert-manager helm repo
       community.kubernetes.helm_repository:
         name: jetstack
@@ -65,8 +84,6 @@
         release_namespace: cert-manager
         create_namespace: true
         wait: yes
-        values:
-          installCRDs: true
 
     - name: Wait for cert-manager to be fully provisioned
       shell: kubectl get pods --namespace cert-manager -o json
@@ -121,7 +138,7 @@
         api_version: v1
         kind: Namespace
         state: present
-    
+
     - name: Deploy mongo-kubernetes-operator
       shell: "{{ item }}"
       with_items:
@@ -179,7 +196,7 @@
 
     - name: Add custom Grafana dashboards
       shell: "{{ item }}"
-      with_items: 
+      with_items:
         # mqtt dashboard
         - kubectl -n monitoring create cm prometheus-kube-prometheus-mqtt --from-file ../setup/dashboards/mqtt.json
         - kubectl -n monitoring label cm prometheus-kube-prometheus-mqtt grafana_dashboard="1"
