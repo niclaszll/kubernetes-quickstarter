@@ -1,0 +1,76 @@
+---
+- hosts: localhost
+  connection: local
+  tasks:
+    - name: Install mongo-kubernetes-operator CRDs
+      shell: kubectl apply -f https://raw.githubusercontent.com/mongodb/mongodb-kubernetes-operator/master/config/crd/bases/mongodbcommunity.mongodb.com_mongodbcommunity.yaml
+      when: install_mongodb | bool
+
+    - name: Create mongo namespace
+      community.kubernetes.k8s:
+        name: mongo
+        api_version: v1
+        kind: Namespace
+        state: present
+      when: install_mongodb | bool
+
+    - name: Deploy mongo-kubernetes-operator
+      shell: "{{ item }}"
+      with_items:
+        # Install necessary roles and role-bindings
+        - kubectl apply -f https://raw.githubusercontent.com/mongodb/mongodb-kubernetes-operator/master/config/rbac/role.yaml -n mongo
+        - kubectl apply -f https://raw.githubusercontent.com/mongodb/mongodb-kubernetes-operator/master/config/rbac/role_binding.yaml -n mongo
+        - kubectl apply -f https://raw.githubusercontent.com/mongodb/mongodb-kubernetes-operator/master/config/rbac/service_account.yaml -n mongo
+        # Install Operator
+        - kubectl apply -f https://raw.githubusercontent.com/mongodb/mongodb-kubernetes-operator/master/config/manager/manager.yaml -n mongo
+      when: install_mongodb | bool
+
+    - name: Deploy MongoDB
+      community.kubernetes.k8s:
+        state: present
+        namespace: mongo
+        src: ../setup/kubernetes/mongo-config.yaml
+      when: install_mongodb | bool
+
+    # - name: Install VerneMQ repo
+    #   community.kubernetes.helm_repository:
+    #     name: vernemq
+    #     repo_url: "https://vernemq.github.io/docker-vernemq"
+    #   when: install_vernemq | bool
+
+    # - name: Deploy VerneMQ
+    #   community.kubernetes.helm:
+    #     name: vernemq
+    #     chart_ref: vernemq/vernemq
+    #     update_repo_cache: yes
+    #     release_namespace: mqtt
+    #     create_namespace: true
+    #     values_files:
+    #       - ../setup/helm/values/vernemq-helm-values.yaml
+    #   when: install_vernemq | bool
+
+    # use cloned repo for now, helm chart not updated yet
+    - name: Deploy VerneMQ from local path
+      community.kubernetes.helm:
+        name: vernemq
+        chart_ref: ../setup/helm/charts/vernemq
+        release_namespace: mqtt
+        create_namespace: true
+        values_files:
+          - ../setup/helm/values/vernemq-helm-values.yaml
+      when: install_vernemq | bool
+
+    - name: Install EMQ X repo
+      community.kubernetes.helm_repository:
+        name: emqx
+        repo_url: "https://repos.emqx.io/charts"
+      when: install_emqx | bool
+
+    - name: Deploy EMQ X
+      community.kubernetes.helm:
+        name: emqx
+        chart_ref: emqx/emqx
+        update_repo_cache: yes
+        release_namespace: mqtt
+        create_namespace: true
+      when: install_emqx | bool

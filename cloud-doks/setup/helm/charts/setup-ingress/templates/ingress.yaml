@@ -5,7 +5,7 @@ metadata:
   namespace: monitoring
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /
-    {{- if eq .Values.production "true" }}
+    {{- if .Values.production }}
     cert-manager.io/cluster-issuer: "letsencrypt-prod"
     {{ else }}
     cert-manager.io/cluster-issuer: "letsencrypt-staging"

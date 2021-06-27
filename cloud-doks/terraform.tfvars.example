@@ -1,3 +1,6 @@
 domain = "DOMAIN TO ACCESS CLUSTER LB"
 acme_mail = "ACME EMAIL"
-production = "false"
+production = false
+install_mongodb = true
+install_vernemq = false
+install_emqx = true
