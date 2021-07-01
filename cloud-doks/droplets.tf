@@ -1,7 +1,7 @@
 resource "digitalocean_kubernetes_cluster" "kubernetes_cluster" {
   name    = "priobike-do-cluster"
   region  = "fra1"
-  version = "1.20.7-do.0"
+  version = "1.20.8-do.0"
 
   # This default node pool is mandatory
   node_pool {
@@ -30,5 +30,19 @@ resource "digitalocean_kubernetes_cluster" "kubernetes_cluster" {
   provisioner "local-exec" {
     when    = destroy
     command = "ANSIBLE_HOST_KEY_CHECKING=False ANSIBLE_FORCE_COLOR=true ansible-playbook --connection=local -v ansible/cleanup-playbook.yaml"
+  }
+}
+
+# additional node pool dedicated to testing tools (load testing, etc.)
+resource digitalocean_kubernetes_node_pool "testing" {
+  cluster_id = digitalocean_kubernetes_cluster.kubernetes_cluster.id
+
+  name       = "testing-pool"
+  size       = "s-2vcpu-2gb"
+  node_count = 1
+  taint {
+    key    = "kind"
+    value  = "testing"
+    effect = "NoSchedule"
   }
 }

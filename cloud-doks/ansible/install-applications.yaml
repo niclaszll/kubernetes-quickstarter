@@ -73,4 +73,6 @@
         update_repo_cache: yes
         release_namespace: mqtt
         create_namespace: true
+        values_files:
+          - ../setup/helm/values/emqx.yaml
       when: install_emqx | bool

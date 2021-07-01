@@ -3,8 +3,24 @@ additionalEnv:
     value: "yes"
   - name: DOCKER_VERNEMQ_ALLOW_ANONYMOUS
     value: "on"
+  - name: DOCKER_VERNEMQ_MAX_CLIENT_ID_SIZE
+    value: "100"
+  - name: DOCKER_VERNEMQ_MAX_ONLINE_MESSAGES
+    value: "1000000"
+  - name: DOCKER_VERNEMQ_MAX_OFFLINE_MESSAGES
+    value: "100000"
+  - name: DOCKER_VERNEMQ_MAX_INFLIGHT_MESSAGES
+    value: "0"
 serviceMonitor:
   create: true
   labels:
     release: prometheus
 envFrom: []
+replicaCount: 1
+resources:
+  limits:
+    cpu: 1000m
+    memory: 1024Mi
+  requests:
+    cpu: 1000m
+    memory: 1024Mi

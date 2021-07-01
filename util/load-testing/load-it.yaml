@@ -1,0 +1,19 @@
+# connect with: kubectl exec --stdin --tty load-it -- /bin/ash
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    run: load-it
+  name: load-it
+spec:
+  containers:
+  - image: zellerhub/load-it:1.0.0
+    name: load-it
+    command: [ "sleep", "infinity" ]
+  tolerations:
+  - key: "kind"
+    operator: "Equal"
+    value: "testing"
+    effect: "NoSchedule"
+  dnsPolicy: ClusterFirst
+  restartPolicy: Always
