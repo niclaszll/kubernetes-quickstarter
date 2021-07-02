@@ -78,4 +78,4 @@ Load balancers and block storage will be destroyed through a destroy-time provis
 
 ### Access monitoring applications
 
-Grafana, Prometheus and the Alertmanager are respectively accessible on the subdomains `grafana.*`, `prometheus.*` and `alertmanager.*` of your Domain. It may take a few seconds till all pods are started.
+Grafana, Prometheus and the Alertmanager are respectively accessible on the subdomains `grafana.*`, `prometheus.*` and `alertmanager.*` of your domain. It may take a few seconds till all pods are started.
