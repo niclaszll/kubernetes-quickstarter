@@ -7,13 +7,13 @@ metadata:
   name: load-it
 spec:
   containers:
-  - image: zellerhub/load-it:1.0.0
-    name: load-it
-    command: [ "sleep", "infinity" ]
+    - image: zellerhub/load-it:1.0.0
+      name: load-it
+      command: ["sleep", "infinity"]
   tolerations:
-  - key: "kind"
-    operator: "Equal"
-    value: "testing"
-    effect: "NoSchedule"
+    - key: "kind"
+      operator: "Equal"
+      value: "testing"
+      effect: "NoSchedule"
   dnsPolicy: ClusterFirst
   restartPolicy: Always
