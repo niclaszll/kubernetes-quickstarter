@@ -1,8 +1,8 @@
 # Kubernetes Setup
 
-Multi node Kubernetes cluster setup with [kube-prometheus-stack](https://github.com/prometheus-operator/kube-prometheus) for local development and cloud deployment on DigitalOcean (self-managed or in [DOKS](https://www.digitalocean.com/products/kubernetes/)).
+Multi node Kubernetes cluster setup with [kube-prometheus-stack](https://github.com/prometheus-operator/kube-prometheus) for cloud deployment on DigitalOcean (self-managed or in [DOKS](https://www.digitalocean.com/products/kubernetes/)).
 
-## Cloud Deployment with Terraform and Ansible
+## Installation
 
 Make sure you have [Ansible](https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html), the [Ansible Kubernetes Collection](https://galaxy.ansible.com/community/kubernetes) and [Terraform](https://learn.hashicorp.com/tutorials/terraform/install-cli) installed on your system.
 
@@ -54,7 +54,7 @@ To initialize Terraform, run the following command once inside the `cloud-do-sel
 terraform init
 ```
 
-### Usage
+## Usage
 
 _Run the following commands inside the `cloud-do-self-managed/` or `cloud-doks/` directory._
 
@@ -79,24 +79,3 @@ Load balancers and block storage will be destroyed through a destroy-time provis
 ### Access monitoring applications
 
 Grafana, Prometheus and the Alertmanager are respectively accessible on the subdomains `grafana.*`, `prometheus.*` and `alertmanager.*` of your Domain. It may take a few seconds till all pods are started.
-
-## Local Development with Virtualbox, Vagrant and Ansible
-
-Make sure you have [VirtualBox](https://www.virtualbox.org/), [Vagrant](https://www.vagrantup.com/docs/installation), [Ansible](https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html) and the [Ansible Kubernetes Collection](https://galaxy.ansible.com/community/kubernetes) installed on your system.
-
-### Usage
-
-_Run the following commands inside the `local` directory._
-
-Start VM:
-
-```sh
-vagrant up
-```
-
-Connect to VM:
-
-```sh
-vagrant ssh master
-vagrant ssh worker
-```
