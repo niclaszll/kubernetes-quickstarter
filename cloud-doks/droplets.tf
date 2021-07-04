@@ -45,4 +45,8 @@ resource digitalocean_kubernetes_node_pool "testing" {
     value  = "testing"
     effect = "NoSchedule"
   }
+
+  provisioner "local-exec" {
+    command = "ANSIBLE_HOST_KEY_CHECKING=False ANSIBLE_FORCE_COLOR=true ansible-playbook --connection=local ansible/install-testing-tools.yaml"
+  }
 }

@@ -129,6 +129,15 @@
         values_files:
           - ../setup/helm/values/prometheus-adapter-values.yaml
 
+    - name: Deploy prometheus-pushgateway
+      community.kubernetes.helm:
+        name: prometheus-pushgateway
+        chart_ref: prometheus-community/prometheus-pushgateway
+        update_repo_cache: yes
+        release_namespace: monitoring
+        values_files:
+          - ../setup/helm/values/prometheus-pushgateway.yaml
+
     - name: Add prometheus-statsd-exporter helm repo
       community.kubernetes.helm_repository:
         name: hahow
@@ -146,9 +155,9 @@
     - name: Add custom Grafana dashboards
       shell: "{{ item }}"
       with_items:
-        # mqtt dashboard
-        - kubectl -n monitoring create cm prometheus-kube-prometheus-mqtt --from-file ../setup/dashboards/mqtt.json
-        - kubectl -n monitoring label cm prometheus-kube-prometheus-mqtt grafana_dashboard="1"
+        # emqx dashboard
+        - kubectl -n monitoring create cm prometheus-kube-prometheus-emqx --from-file ../setup/dashboards/emqx.json
+        - kubectl -n monitoring label cm prometheus-kube-prometheus-emqx grafana_dashboard="1"
         # k6 dashboard
         - kubectl -n monitoring create cm prometheus-kube-prometheus-k6 --from-file ../setup/dashboards/k6.json
         - kubectl -n monitoring label cm prometheus-kube-prometheus-k6 grafana_dashboard="1"

@@ -15,6 +15,7 @@ spec:
   - hosts:
     - grafana.{{ .Values.domain }}
     - prometheus.{{ .Values.domain }}
+    - pushgateway.{{ .Values.domain }}
     - alertmanager.{{ .Values.domain }}
     secretName: priobike-tls
   rules:
@@ -38,6 +39,16 @@ spec:
                 name: prometheus-operated
                 port:
                   number: 9090
+    - host: pushgateway.{{ .Values.domain }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: prometheus-pushgateway
+                port:
+                  number: 9091
     - host: alertmanager.{{ .Values.domain }}
       http:
         paths:

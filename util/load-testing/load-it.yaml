@@ -5,6 +5,7 @@ metadata:
   labels:
     run: load-it
   name: load-it
+  namespace: default
 spec:
   containers:
     - image: zellerhub/load-it:1.0.0

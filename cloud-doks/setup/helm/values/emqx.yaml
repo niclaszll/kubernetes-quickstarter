@@ -6,3 +6,17 @@ resources:
   requests:
     cpu: 1000m
     memory: 1024Mi
+emqxConfig:
+  # todo works for now, fix in future
+  # see: https://github.com/emqx/emqx-prometheus/issues/85
+  EMQX_PROMETHEUS__PUSH__GATEWAY__SERVER: http://prometheus-pushgateway.monitoring.svc:9091
+  EMQX_PROMETHEUS__INTERVAL: 10000
+emqxLoadedPlugins: >
+  {emqx_management, true}.
+  {emqx_recon, true}.
+  {emqx_retainer, true}.
+  {emqx_dashboard, true}.
+  {emqx_telemetry, true}.
+  {emqx_rule_engine, true}.
+  {emqx_bridge_mqtt, false}.
+  {emqx_prometheus, true}.
