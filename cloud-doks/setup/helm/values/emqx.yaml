@@ -7,10 +7,9 @@ resources:
     cpu: 1000m
     memory: 1024Mi
 emqxConfig:
-  # todo works for now, fix in future
-  # see: https://github.com/emqx/emqx-prometheus/issues/85
   EMQX_PROMETHEUS__PUSH__GATEWAY__SERVER: http://prometheus-pushgateway.monitoring.svc:9091
-  EMQX_PROMETHEUS__INTERVAL: 10000
+  EMQX_PROMETHEUS__INTERVAL: 15000
+  # EMQX_LOG__LEVEL: debug
 emqxLoadedPlugins: >
   {emqx_management, true}.
   {emqx_recon, true}.
