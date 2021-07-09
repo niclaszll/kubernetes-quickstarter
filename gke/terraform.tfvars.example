@@ -1,7 +1,0 @@
-project_id = "GCP PROJECT ID"
-region     = "europe-west3"
-zone     = "europe-west3-a"
-
-domain = "DOMAIN TO ACCESS CLUSTER LB"
-acme_mail = "ACME EMAIL"
-production = false

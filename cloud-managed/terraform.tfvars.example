@@ -1,0 +1,16 @@
+# General
+create_gke = false
+create_doks = true
+domain = "example.com"
+acme_mail = "mail@example.com"
+production = false
+
+# GKE
+project_id = "your-project-id"
+region     = "europe-west3"
+zone     = "europe-west3-a"
+
+# Applications
+install_mongodb = false
+install_vernemq = false
+install_emqx = false

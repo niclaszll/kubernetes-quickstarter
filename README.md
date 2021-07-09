@@ -1,6 +1,6 @@
 # Kubernetes Setup
 
-Multi node Kubernetes cluster setup with [kube-prometheus-stack](https://github.com/prometheus-operator/kube-prometheus) for cloud deployment on DigitalOcean (self-managed or in [DOKS](https://www.digitalocean.com/products/kubernetes/)).
+Multi node Kubernetes cluster setup with [kube-prometheus-stack](https://github.com/prometheus-operator/kube-prometheus) for cloud deployment on GKE and DigitalOcean (self-managed or in [DOKS](https://www.digitalocean.com/products/kubernetes/)).
 
 ## Installation
 
@@ -56,7 +56,7 @@ terraform init
 
 ## Usage
 
-_Run the following commands inside the `cloud-do-self-managed/` or `cloud-doks/` directory._
+_Run the following commands inside the `cloud-do-self-managed/` or `cloud-managed/` directory._
 
 Provision resources:
 

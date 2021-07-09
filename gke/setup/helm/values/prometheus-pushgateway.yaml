@@ -1,6 +1,0 @@
-serviceMonitor:
-  enabled: true
-  additionalLabels:
-    release: prometheus
-extraArgs:
-  - --web.enable-admin-api
