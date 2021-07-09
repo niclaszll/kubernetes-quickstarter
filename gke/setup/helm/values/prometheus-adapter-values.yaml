@@ -1,0 +1,2 @@
+prometheus:
+  url: http://prometheus-kube-prometheus-prometheus.monitoring.svc

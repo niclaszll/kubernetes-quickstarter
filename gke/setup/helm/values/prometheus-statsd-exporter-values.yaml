@@ -1,0 +1,3 @@
+serviceMonitor:
+  additionalLabels:
+    release: prometheus

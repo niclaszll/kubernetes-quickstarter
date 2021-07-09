@@ -1,0 +1,5 @@
+apiVersion: v2
+name: setup-ingress
+description: Helm chart for the ingress definitions
+type: application
+version: 0.1.0

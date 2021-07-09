@@ -1,0 +1,5 @@
+apiVersion: v2
+name: priobike-issuers
+description: Helm chart for all issuers
+type: application
+version: 0.1.0
