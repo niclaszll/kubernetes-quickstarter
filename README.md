@@ -1,28 +1,17 @@
 # Kubernetes Setup
 
-Multi node Kubernetes cluster setup with [kube-prometheus-stack](https://github.com/prometheus-operator/kube-prometheus) for cloud deployment on GKE and DigitalOcean (self-managed or in [DOKS](https://www.digitalocean.com/products/kubernetes/)).
+Multi node Kubernetes cluster setup with [kube-prometheus-stack](https://github.com/prometheus-operator/kube-prometheus), deployed on [GKE](https://cloud.google.com/kubernetes-engine) or [DigitalOcean Kubernetes (DOKS)](https://www.digitalocean.com/products/kubernetes/).
 
 ## Installation
 
-Make sure you have [Ansible](https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html), the [Ansible Kubernetes Collection](https://galaxy.ansible.com/community/kubernetes) and [Terraform](https://learn.hashicorp.com/tutorials/terraform/install-cli) installed on your system.
+Make sure you have the following software installed on your system:
 
-If you want to use the DOKS-Setup, you also need to install [kubectl](https://kubernetes.io/docs/tasks/tools/#kubectl), [Helm](https://helm.sh/docs/intro/install/) and [doctl](https://github.com/digitalocean/doctl).
-
-### Setup SSH for Digital Ocean (only needed for self-managed cluster setup)
-
-You will need to add a new SSH keypair to your DigitalOcean account. Open a terminal and run the following command:
-
-```sh
-ssh-keygen
-```
-
-You will be prompted to save and name the key.
-
-```
-Generating public/private rsa key pair. Enter file in which to save the key (/Users/USER/.ssh/id_rsa):
-```
-
-This will generate two files, by default called `id_rsa` and `id_rsa.pub`. Next, copy and paste the contents of the .pub file, typically `id_rsa.pub`, into the SSH key content field in the `Add SSH Key` section under your [DigitalOcean account security settings](https://cloud.digitalocean.com/account/security). For more information, see the [DigitalOcean Docs](https://docs.digitalocean.com/products/droplets/how-to/add-ssh-keys/to-account/).
+- [Ansible](https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html)
+- [Ansible Kubernetes Collection](https://galaxy.ansible.com/community/kubernetes)
+- [Terraform](https://learn.hashicorp.com/tutorials/terraform/install-cli)
+- [kubectl](https://kubernetes.io/docs/tasks/tools/#kubectl)
+- [Helm](https://helm.sh/docs/intro/install/)
+- [doctl](https://github.com/digitalocean/doctl) (only DOKS)
 
 ### Setup Domain on Digital Ocean
 
@@ -48,7 +37,7 @@ export TF_LOG=1
 
 Now make a copy of `terraform.tfvars.example`, rename it to `terraform.tfvars` and define all variables within.
 
-To initialize Terraform, run the following command once inside the `cloud-do-self-managed/` or `cloud-doks/` directory:
+To initialize Terraform, run the following command once:
 
 ```sh
 terraform init
@@ -56,17 +45,13 @@ terraform init
 
 ## Usage
 
-_Run the following commands inside the `cloud-do-self-managed/` or `cloud-managed/` directory._
-
 Provision resources:
 
 ```sh
 terraform apply -var "do_token=${DO_PAT}" -auto-approve
 ```
 
-In the case of the self-managed cluster, SSH connection details will be printed to your console once Terraform has successfully finished provisioning all resources.
-
-If you are using the DOKS setup, you can access the cluster directly using `kubectl` without connecting via SSH first, since Terraform automatically adds the credentials for your cluster to your local `kubeconfig`.
+You can access the cluster directly using `kubectl`, since Terraform automatically adds the credentials for your cluster to your local `kubeconfig`.
 
 Destroy resources:
 
@@ -74,7 +59,7 @@ Destroy resources:
 terraform destroy -var "do_token=${DO_PAT}" -auto-approve
 ```
 
-Load balancers and block storage will be destroyed through a destroy-time provisioner, using the DigitalOcean API, as they are not directly managed by Terraform.
+**Attention! (only DOKS)**: Load balancers and block storage will be destroyed through a destroy-time provisioner, using the DigitalOcean API, as they are not directly managed by Terraform. **All LB and Block Storage resources in the account will be destroyed!** If this is not desired, then deactivate the destroy-time provisioner.
 
 ### Access monitoring applications
 

@@ -5,4 +5,4 @@
     - name: Deploy load-it pod
       community.kubernetes.k8s:
         state: present
-        src: ../../util/load-testing/load-it.yaml
+        src: ../setup/kubernetes/load-it.yaml

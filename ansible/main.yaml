@@ -23,7 +23,7 @@
       retries: 30
       delay: 15
 
-    - include_tasks: enable-pod-communication.yaml
+    - include_tasks: doks/enable-pod-communication.yaml
       when: create_doks | bool
 
     - name: Create monitoring namespace
@@ -48,7 +48,8 @@
 
     - name: Update helm (not working via update_repo_cache)
       shell: helm repo update
-
+    
+    # change provider if DigitalOcean does not manage your dns records
     - name: Deploy ExternalDNS to automatically Manage DNS Records
       shell: helm install external-dns bitnami/external-dns --set provider=digitalocean,digitalocean.apiToken="{{ do_token }}",interval="1m",policy=sync -n kube-system
 

@@ -18,18 +18,18 @@ resource "digitalocean_kubernetes_cluster" "kubernetes_cluster" {
   }
 
   provisioner "local-exec" {
-    command = "ANSIBLE_HOST_KEY_CHECKING=False ANSIBLE_FORCE_COLOR=true ansible-playbook --connection=local -e 'do_token=${var.do_token} acme_mail=${var.acme_mail} domain=${var.domain} production=${var.production} create_gke=false create_doks=true' ansible/main-playbook.yaml"
+    command = "ANSIBLE_HOST_KEY_CHECKING=False ANSIBLE_FORCE_COLOR=true ansible-playbook --connection=local -e 'do_token=${var.do_token} acme_mail=${var.acme_mail} domain=${var.domain} production=${var.production} create_gke=false create_doks=true' ansible/main.yaml"
   }
 
   provisioner "local-exec" {
-    command = "ANSIBLE_HOST_KEY_CHECKING=False ANSIBLE_FORCE_COLOR=true ansible-playbook --connection=local -e 'install_mongodb=${var.install_mongodb} install_vernemq=${var.install_vernemq} install_emqx=${var.install_emqx}' ansible/install-applications.yaml"
+    command = "ANSIBLE_HOST_KEY_CHECKING=False ANSIBLE_FORCE_COLOR=true ansible-playbook --connection=local -e 'install_mongodb=${var.install_mongodb} install_vernemq=${var.install_vernemq} install_emqx=${var.install_emqx}' ansible/applications.yaml"
   }
 
   # remove all loadbalancers from account
   # unfortunately terraform doesn't support using vars in destroy-time provisioners, we therefore access the "DO_PAT" env var directly in the playbook
   provisioner "local-exec" {
     when    = destroy
-    command = "ANSIBLE_HOST_KEY_CHECKING=False ANSIBLE_FORCE_COLOR=true ansible-playbook --connection=local -v ansible/cleanup-playbook.yaml"
+    command = "ANSIBLE_HOST_KEY_CHECKING=False ANSIBLE_FORCE_COLOR=true ansible-playbook --connection=local -v ansible/doks/cleanup.yaml"
   }
 }
 
@@ -47,6 +47,6 @@ resource digitalocean_kubernetes_node_pool "testing" {
   }
 
   provisioner "local-exec" {
-    command = "ANSIBLE_HOST_KEY_CHECKING=False ANSIBLE_FORCE_COLOR=true ansible-playbook --connection=local ansible/install-testing-tools.yaml"
+    command = "ANSIBLE_HOST_KEY_CHECKING=False ANSIBLE_FORCE_COLOR=true ansible-playbook --connection=local ansible/testing-tools.yaml"
   }
 }

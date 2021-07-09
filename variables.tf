@@ -14,7 +14,7 @@ variable "create_gke" {
 
 variable "do_token" {
   type        = string
-  description = "DigitalOcean Personal Access Token for External-DNS"
+  description = "DigitalOcean Personal Access Token"
 }
 
 variable "acme_mail" {

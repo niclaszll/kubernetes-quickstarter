@@ -22,6 +22,6 @@
   vars:
     a_records: '{{ domain_records.json | json_query("domain_records[?(@.type == ''A'' && @.name == ''lb'')].id")}}'
 
-- include_tasks: ingress-nginx-digital-ocean-override.yaml
+- include_tasks: ingress-nginx-override.yaml
   vars:
     lb_domain: "lb.{{ domain }}"
