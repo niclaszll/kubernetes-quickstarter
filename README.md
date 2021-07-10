@@ -18,6 +18,8 @@ Make sure you have the following software installed on your system:
 
 To set up a domain name, you need to purchase a domain name from a domain name registrar and then set up DNS records for it. This setup assumes that DigitalOcean is used to manage DNS records (both for the GKE and DOKS setup). For this you need to add your domain to your DigitalOcean account and [update your domain’s NS records to point to DigitalOcean’s name servers](https://www.digitalocean.com/community/tutorials/how-to-point-to-digitalocean-nameservers-from-common-domain-registrars). Later, all necessary A-records are automatically created via [ExternalDNS](https://github.com/kubernetes-sigs/external-dns) to point your domain to the load balancer.
 
+> You may need to manually delete DNS records when switching between DOKS and GKE clusters, as ExternalDNS sometimes does not update records correctly
+
 ### Create Personal Access Token in DigitalOcean
 
 You need to [create a Personal Access Token in DigitalOcean](https://docs.digitalocean.com/reference/api/create-personal-access-token/). Terraform (and other tools like ExternalDNS) will use your DigitalOcean Personal Access Token to communicate with the DigitalOcean API and manage resources in your account. **Don’t share this key with others, and keep it out of scripts and version control!** Export your DigitalOcean Personal Access Token to an environment variable called `DO_PAT`. This will make using it in subsequent commands easier and keep it separate from your code:
@@ -74,7 +76,7 @@ Destroy resources:
 terraform destroy -var "do_token=${DO_PAT}" -auto-approve
 ```
 
-**Attention! (only DOKS)**: Load balancers and block storage will be destroyed through a destroy-time provisioner, using the DigitalOcean API, as they are not directly managed by Terraform. **All LB and Block Storage resources in the account will be destroyed!** If this is not desired, then deactivate the destroy-time provisioner.
+> **Important (only DOKS):** Load balancers and block storage will be destroyed through a destroy-time provisioner, using the DigitalOcean API, as they are not directly managed by Terraform and are also not automatically destroyed when the cluster is destroyed (as is the case with GKE). **All LB and Block Storage resources in your account will be destroyed!** If this is not desired, then deactivate the destroy-time provisioner.
 
 ### Access monitoring applications
 

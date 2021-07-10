@@ -1,2 +1,3 @@
 prometheus:
   url: http://prometheus-kube-prometheus-prometheus.monitoring.svc
+# GKE already comes with metrics-server preinstalled and therefore doesn't need CPU/memory resource metrics from prometheus-adapter
