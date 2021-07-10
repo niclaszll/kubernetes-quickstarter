@@ -12,20 +12,35 @@ Make sure you have the following software installed on your system:
 - [kubectl](https://kubernetes.io/docs/tasks/tools/#kubectl)
 - [Helm](https://helm.sh/docs/intro/install/)
 - [doctl](https://github.com/digitalocean/doctl) (only DOKS)
+- [gcloud SDK](https://cloud.google.com/sdk/docs/install) (only GKE)
 
-### Setup Domain on Digital Ocean
+### Setup Domain
 
-To use your own domain, you need to add it to your DigitalOcean account and [update your domain’s NS records to point to DigitalOcean’s name servers](https://www.digitalocean.com/community/tutorials/how-to-point-to-digitalocean-nameservers-from-common-domain-registrars). Later, all necessary A-records are automatically created via [ExternalDNS](https://github.com/kubernetes-sigs/external-dns) to point the domain to the load balancer.
+To set up a domain name, you need to purchase a domain name from a domain name registrar and then set up DNS records for it. This setup assumes that DigitalOcean is used to manage DNS records (both for the GKE and DOKS setup). For this you need to add your domain to your DigitalOcean account and [update your domain’s NS records to point to DigitalOcean’s name servers](https://www.digitalocean.com/community/tutorials/how-to-point-to-digitalocean-nameservers-from-common-domain-registrars). Later, all necessary A-records are automatically created via [ExternalDNS](https://github.com/kubernetes-sigs/external-dns) to point your domain to the load balancer.
 
 ### Create Personal Access Token in DigitalOcean
 
-You first need to [create a Personal Access Token in DigitalOcean](https://docs.digitalocean.com/reference/api/create-personal-access-token/). Terraform will use your DigitalOcean Personal Access Token to communicate with the DigitalOcean API and manage resources in your account. **Don’t share this key with others, and keep it out of scripts and version control!** Export your DigitalOcean Personal Access Token to an environment variable called `DO_PAT`. This will make using it in subsequent commands easier and keep it separate from your code:
+You need to [create a Personal Access Token in DigitalOcean](https://docs.digitalocean.com/reference/api/create-personal-access-token/). Terraform (and other tools like ExternalDNS) will use your DigitalOcean Personal Access Token to communicate with the DigitalOcean API and manage resources in your account. **Don’t share this key with others, and keep it out of scripts and version control!** Export your DigitalOcean Personal Access Token to an environment variable called `DO_PAT`. This will make using it in subsequent commands easier and keep it separate from your code:
 
 ```sh
 export DO_PAT="YOUR_PERSONAL_ACCESS_TOKEN"
 ```
 
 I would recommend adding this line to your shell configuration files to avoid having to do this step again in the future.
+
+### Setup GKE
+
+After you've installed the gcloud SDK, initialize it by running the following command to authorize the SDK to access GCP using your user account credentials and add the SDK to your PATH:
+
+```sh
+gcloud init
+```
+
+Finally, add your account to the Application Default Credentials (ADC). This will allow Terraform to access these credentials to provision resources on GCloud.
+
+```sh
+gcloud auth application-default login
+```
 
 ### Setup Terraform
 
