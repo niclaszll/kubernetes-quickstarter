@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    run: mzbench
+  name: mzbench
+  namespace: testing
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      run: mzbench
+  template:
+    metadata:
+      labels:
+        run: mzbench
+    spec:
+      containers:
+      - name: mzbench
+        image: zellerhub/mzbench:1.0.0
+        ports:
+        - containerPort: 4800
+      tolerations:
+      - key: "kind"
+        operator: "Equal"
+        value: "testing"
+        effect: "NoSchedule"

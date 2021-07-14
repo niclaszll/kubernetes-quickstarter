@@ -6,3 +6,12 @@
       community.kubernetes.k8s:
         state: present
         src: ../setup/kubernetes/load-it.yaml
+    - name: Deploy mzbench chart from local path
+      community.kubernetes.helm:
+        name: mzbench
+        chart_ref: ../setup/helm/charts/mzbench
+        release_namespace: testing
+        create_namespace: true
+        values:
+          domain: "{{ domain }}"
+          production: "{{ production | bool }}"

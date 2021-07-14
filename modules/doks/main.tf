@@ -6,10 +6,10 @@ resource "digitalocean_kubernetes_cluster" "kubernetes_cluster" {
   # This default node pool is mandatory
   node_pool {
     name       = "default-pool"
-    size       = "s-2vcpu-4gb"
+    size       = "s-4vcpu-8gb"
     auto_scale = true
-    min_nodes  = 2
-    max_nodes  = 3
+    min_nodes  = 1
+    max_nodes  = 1
   }
 
   # configure local kubeconfig to access cluster via kubectl
@@ -47,6 +47,6 @@ resource digitalocean_kubernetes_node_pool "testing" {
   }
 
   provisioner "local-exec" {
-    command = "ANSIBLE_HOST_KEY_CHECKING=False ANSIBLE_FORCE_COLOR=true ansible-playbook --connection=local ansible/testing-tools.yaml"
+    command = "ANSIBLE_HOST_KEY_CHECKING=False ANSIBLE_FORCE_COLOR=true ansible-playbook --connection=local -e 'domain=${var.domain} production=${var.production}' ansible/testing-tools.yaml"
   }
 }

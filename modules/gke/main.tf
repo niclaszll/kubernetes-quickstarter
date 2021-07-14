@@ -95,6 +95,6 @@ resource "google_container_node_pool" "testing_nodes" {
   }
 
   provisioner "local-exec" {
-    command = "ANSIBLE_HOST_KEY_CHECKING=False ANSIBLE_FORCE_COLOR=true ansible-playbook --connection=local ansible/testing-tools.yaml"
+    command = "ANSIBLE_HOST_KEY_CHECKING=False ANSIBLE_FORCE_COLOR=true ansible-playbook --connection=local -e 'domain=${var.domain} production=${var.production}' ansible/testing-tools.yaml"
   }
 }

@@ -1,0 +1,28 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: priobike-ingress-testing
+  namespace: testing
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    {{- if .Values.production }}
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    {{ else }}
+    cert-manager.io/cluster-issuer: "letsencrypt-staging"
+    {{- end }}
+spec:
+  tls:
+  - hosts:
+    - mzbench.{{ .Values.domain }}
+    secretName: priobike-tls
+  rules:
+    - host: mzbench.{{ .Values.domain }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: mzbench
+                port:
+                  number: 4800
