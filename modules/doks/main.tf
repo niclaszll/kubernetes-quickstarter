@@ -38,7 +38,7 @@ resource digitalocean_kubernetes_node_pool "testing" {
   cluster_id = digitalocean_kubernetes_cluster.kubernetes_cluster.id
 
   name       = "testing-pool"
-  size       = "s-2vcpu-2gb"
+  size       = "s-4vcpu-8gb"
   node_count = 1
   taint {
     key    = "kind"

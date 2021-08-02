@@ -1,11 +1,11 @@
 replicaCount: 1
 resources:
   limits:
-    cpu: 1000m
-    memory: 1024Mi
+    cpu: 2000m
+    memory: 1500Mi
   requests:
-    cpu: 1000m
-    memory: 1024Mi
+    cpu: 2000m
+    memory: 1500Mi
 emqxConfig:
   EMQX_PROMETHEUS__PUSH__GATEWAY__SERVER: http://prometheus-pushgateway.monitoring.svc:9091
   EMQX_PROMETHEUS__INTERVAL: 15000

@@ -16,12 +16,19 @@ spec:
         run: mzbench
     spec:
       containers:
-      - name: mzbench
-        image: zellerhub/mzbench:1.0.0
-        ports:
-        - containerPort: 4800
+        - name: mzbench
+          image: zellerhub/mzbench:1.0.1
+          ports:
+            - containerPort: 4800
+          resources:
+            requests:
+              memory: "5Gi"
+              cpu: "3400m"
+            limits:
+              memory: "5Gi"
+              cpu: "3400m"
       tolerations:
-      - key: "kind"
-        operator: "Equal"
-        value: "testing"
-        effect: "NoSchedule"
+        - key: "kind"
+          operator: "Equal"
+          value: "testing"
+          effect: "NoSchedule"
