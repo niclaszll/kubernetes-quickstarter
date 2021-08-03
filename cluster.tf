@@ -15,7 +15,6 @@ module "doks_cluster" {
   domain                            = var.domain
   production                        = var.production
   install_mongodb                   = var.install_mongodb
-  install_vernemq                   = var.install_vernemq
   install_emqx                      = var.install_emqx
 }
 
@@ -27,7 +26,6 @@ module "gke_cluster" {
   domain                            = var.domain
   production                        = var.production
   install_mongodb                   = var.install_mongodb
-  install_vernemq                   = var.install_vernemq
   install_emqx                      = var.install_emqx
   project_id                        = var.project_id
   region                            = var.region

@@ -58,7 +58,7 @@ resource "google_container_node_pool" "primary_nodes" {
   }
 
   provisioner "local-exec" {
-    command = "ANSIBLE_HOST_KEY_CHECKING=False ANSIBLE_FORCE_COLOR=true ansible-playbook --connection=local -e 'install_mongodb=${var.install_mongodb} install_vernemq=${var.install_vernemq} install_emqx=${var.install_emqx}' ansible/applications.yaml"
+    command = "ANSIBLE_HOST_KEY_CHECKING=False ANSIBLE_FORCE_COLOR=true ansible-playbook --connection=local -e 'install_mongodb=${var.install_mongodb} install_emqx=${var.install_emqx}' ansible/applications.yaml"
   }
 }
 

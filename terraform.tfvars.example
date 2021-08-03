@@ -12,5 +12,4 @@ zone     = "europe-west3-a"
 
 # Applications
 install_mongodb = false
-install_vernemq = false
 install_emqx = false

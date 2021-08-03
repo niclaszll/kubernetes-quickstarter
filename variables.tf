@@ -41,11 +41,6 @@ variable "install_mongodb" {
   description = "Should MongoDB be installed"
 }
 
-variable "install_vernemq" {
-  type        = bool
-  description = "Should VerneMQ be installed"
-}
-
 variable "install_emqx" {
   type        = bool
   description = "Should EMQ X be installed"
