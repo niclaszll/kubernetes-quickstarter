@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: mzbench
-          image: zellerhub/mzbench:1.0.1
+          image: ghcr.io/niclaszll/mzbench:1.0.0
           ports:
             - containerPort: 4800
           resources:

@@ -8,7 +8,7 @@ metadata:
   namespace: default
 spec:
   containers:
-    - image: zellerhub/load-it:1.0.0
+    - image: ghcr.io/niclaszll/load-it:1.0.0
       name: load-it
       command: ["sleep", "infinity"]
   tolerations:
